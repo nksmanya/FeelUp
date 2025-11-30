@@ -8,11 +8,13 @@ const handler = NextAuth({
     CredentialsProvider({
       name: "Credentials",
       credentials: {
+        name: { label: "Name", type: "text" },
         email: { label: "Email", type: "text" },
         password: { label: "Password", type: "password" },
       },
       async authorize(credentials) {
-        const { email, password } = credentials as {
+        const { name, email, password } = credentials as {
+          name?: string;
           email?: string;
           password?: string;
         };
@@ -22,7 +24,9 @@ const handler = NextAuth({
         // Mock validation: accept any password with length >= 6
         // Replace with your real user lookup & password check
         if (password.length >= 6) {
-          return { id: email, name: email, email };
+          // Prefer a provided name, otherwise derive a friendly name from the email local-part
+          const friendlyName = (name && name.trim()) || (email.split("@")[0] || email);
+          return { id: email, name: friendlyName, email };
         }
 
         return null;
