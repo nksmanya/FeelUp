@@ -24,3 +24,71 @@ body {
   color: var(--foreground);
   font-family: Arial, Helvetica, sans-serif;
 }
+
+/* Calm theme tokens */
+:root {
+  --feelup-accent: #7dd3fc; /* light blue */
+  --feelup-accent-2: #c7f9f9; /* pale aqua */
+  --feelup-muted: #64748b; /* muted text */
+  --radius-md: 12px;
+  --shadow-soft: 0 8px 24px rgba(16,24,40,0.06);
+}
+
+/* Brand palette */
+:root {
+  --brand-blue: #2596be;
+  --brand-blue-light: #93cae3;
+  --brand-pink: #ff7ea8;
+  --brand-peach: #ffa3ae;
+  --brand-black: #000000;
+  --brand-white: #ffffff;
+
+  /* Map legacy variables to new palette */
+  --feelup-accent: var(--brand-blue);
+  --feelup-accent-2: var(--brand-blue-light);
+  --feelup-muted: #556877;
+}
+
+/* Logo helpers */
+.logo-img {
+  width: var(--logo-size, 40px);
+  height: var(--logo-size, 40px);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(16,24,40,0.12);
+  background: transparent;
+  display: inline-block;
+}
+.logo-text {
+  color: var(--brand-black);
+  font-weight: 700;
+  font-size: 18px;
+}
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(90deg, var(--brand-blue), var(--brand-pink));
+  color: var(--brand-white);
+  border: none;
+}
+.btn-secondary {
+  background: transparent;
+  border: 1px solid rgba(86,100,120,0.12);
+  color: var(--feelup-muted);
+}
+
+
+/* Subtle animations */
+.fade-in {
+  animation: fadeIn 400ms ease-out both;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.soft-glow {
+  box-shadow: var(--shadow-soft);
+}
+

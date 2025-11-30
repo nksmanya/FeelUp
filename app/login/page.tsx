@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { signIn } from "next-auth/react";
+import Logo from "../../components/Logo";
 
 export default function LoginPage() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -49,10 +50,19 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-zinc-50 dark:bg-black">
-      <main className="w-full max-w-md rounded-lg bg-white p-8 shadow-md dark:bg-[#0b0b0b] transition-all">
-        <div className="mb-6 flex items-center justify-between">
-          <h2 className="text-xl font-semibold">FeelUp — {mode === "signin" ? "Sign in" : "Create account"}</h2>
+    <div className="relative flex min-h-screen items-center justify-center bg-gradient-to-b from-sky-50 to-white dark:from-black dark:to-gray-900">
+      <div className="absolute -top-24 -left-24 h-64 w-64 rounded-full bg-gradient-to-br from-[#e0f7ff] to-transparent opacity-50 blur-3xl" aria-hidden />
+      <div className="absolute -bottom-24 -right-24 h-72 w-72 rounded-full bg-gradient-to-br from-transparent to-[#c7f9f9] opacity-40 blur-3xl" aria-hidden />
+
+      <main className="z-10 w-full max-w-md rounded-[var(--radius-md)] bg-white p-8 soft-glow dark:bg-[#071017] transition-all fade-in">
+        <div className="mb-4 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Logo size={40} />
+            <div>
+              <h1 className="text-lg font-semibold">FeelUp</h1>
+              <p className="text-xs text-[var(--feelup-muted)]">A calm space for emotional sharing</p>
+            </div>
+          </div>
           <Link href="/" className="text-sm text-zinc-600 hover:underline">
             Home
           </Link>
@@ -61,13 +71,15 @@ export default function LoginPage() {
         <div className="mb-4 flex gap-2">
           <button
             onClick={() => setMode("signin")}
-            className={`px-3 py-1 rounded-md ${mode === "signin" ? "bg-black text-white" : "bg-transparent"}`}
+            className={`px-4 py-2 rounded-full text-sm transition ${mode === "signin" ? "bg-[var(--feelup-accent)] text-black" : "bg-transparent text-[var(--feelup-muted)] hover:bg-slate-100"}`}
+            aria-pressed={mode === "signin"}
           >
             Sign in
           </button>
           <button
             onClick={() => setMode("signup")}
-            className={`px-3 py-1 rounded-md ${mode === "signup" ? "bg-black text-white" : "bg-transparent"}`}
+            className={`px-4 py-2 rounded-full text-sm transition ${mode === "signup" ? "bg-[var(--feelup-accent)] text-black" : "bg-transparent text-[var(--feelup-muted)] hover:bg-slate-100"}`}
+            aria-pressed={mode === "signup"}
           >
             Sign up
           </button>
@@ -77,22 +89,24 @@ export default function LoginPage() {
           <label className="flex flex-col text-sm">
             <span className="mb-1">Email</span>
             <input
-              className="rounded-md border px-3 py-2 text-sm"
+              className="rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--feelup-accent)] transition"
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
+              aria-label="Email address"
             />
           </label>
 
           <label className="flex flex-col text-sm">
             <span className="mb-1">Password</span>
             <input
-              className="rounded-md border px-3 py-2 text-sm"
+              className="rounded-md border border-gray-200 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[var(--feelup-accent)] transition"
               type="password"
               value={password}
               onChange={(e) => setPassword(e.target.value)}
               required
+              aria-label="Password"
             />
           </label>
 
@@ -107,8 +121,9 @@ export default function LoginPage() {
 
           <button
             type="submit"
-            className="mt-2 rounded-md bg-black px-4 py-2 text-white disabled:opacity-50"
+            className="mt-2 rounded-full px-4 py-2 text-white disabled:opacity-50 transition-transform active:scale-95 btn-primary"
             disabled={loading || (mode === "signup" && !acceptTerms)}
+            aria-busy={loading}
           >
             {loading ? "Please wait..." : mode === "signin" ? "Sign in" : "Create account"}
           </button>
@@ -119,13 +134,15 @@ export default function LoginPage() {
           <div className="flex gap-3">
             <button
               onClick={() => signIn("google")}
-              className="flex-1 rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
+              className="flex-1 rounded-full px-3 py-2 text-sm hover:opacity-95 btn-secondary"
+              aria-label="Sign in with Google"
             >
               Sign in with Google
             </button>
             <button
               onClick={() => signIn("github")}
-              className="flex-1 rounded-md border px-3 py-2 text-sm hover:bg-gray-50"
+              className="flex-1 rounded-full px-3 py-2 text-sm hover:opacity-95 btn-secondary"
+              aria-label="Sign in with GitHub"
             >
               Sign in with GitHub
             </button>
