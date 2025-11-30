@@ -1,4 +1,5 @@
 import Image from "next/image";
+import Link from "next/link";
 
 export default function Home() {
   return (
@@ -12,7 +13,8 @@ export default function Home() {
           height={20}
           priority
         />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
+        <div className="flex w-full items-center justify-between">
+          <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
           <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
             To get started, edit the page.tsx file.
           </h1>
@@ -33,6 +35,15 @@ export default function Home() {
             </a>{" "}
             center.
           </p>
+          </div>
+          <div className="ml-4 flex items-center">
+            <Link
+              href="/login"
+              className="rounded-full border px-4 py-2 text-sm font-medium hover:bg-black/5"
+            >
+              Login
+            </Link>
+          </div>
         </div>
         <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
           <a
