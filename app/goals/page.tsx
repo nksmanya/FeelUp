@@ -3,7 +3,8 @@
 import { useEffect, useState } from "react";
 import { createBrowserSupabaseClient } from "../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
-import Logo from "../../components/Logo";
+import Navbar from "../../components/Navbar";
+import StreakDisplay from "../../components/StreakDisplay";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 
 const supabase = typeof window !== 'undefined' ? createBrowserSupabaseClient() : null;
@@ -102,6 +103,45 @@ export default function GoalsPage() {
       if (res.ok) {
         setCompletingGoal(null);
         await loadGoals();
+        
+        // Update streak for goal completion
+        try {
+          await fetch('/api/streaks', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_email: user.email,
+              streak_type: 'goals'
+            })
+          });
+        } catch (e) {
+          console.log('Failed to update streak');
+        }
+
+        // Check for achievements
+        try {
+          const completedCount = goals.filter(g => g.completed_at).length + 1;
+          const completedToday = goals.filter(g => {
+            if (!g.completed_at) return false;
+            const completedDate = new Date(g.completed_at).toDateString();
+            return completedDate === new Date().toDateString();
+          }).length + 1;
+
+          await fetch('/api/achievements', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              user_email: user.email,
+              badge_type: 'goals',
+              trigger_data: {
+                totalCompleted: completedCount,
+                completedToday: completedToday
+              }
+            })
+          });
+        } catch (e) {
+          console.log('Failed to check achievements');
+        }
       } else {
         const error = await res.json();
         alert(error.error || 'Failed to complete goal');
@@ -140,53 +180,61 @@ export default function GoalsPage() {
     }
   }, [user, selectedDate]);
 
-  if (loading) return <div className="p-8">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="animate-spin w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your goals...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const completedGoals = goals.filter(g => g.completed_at);
   const pendingGoals = goals.filter(g => !g.completed_at);
   const completionRate = goals.length > 0 ? Math.round((completedGoals.length / goals.length) * 100) : 0;
 
   return (
-    <div className="min-h-screen p-8">
-      <header className="max-w-4xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Logo size={40} />
-          <div>
-            <div className="text-sm text-[var(--feelup-muted)]">Daily Goals</div>
-            <div className="font-semibold">{user?.user_metadata?.full_name || user?.email || "Anonymous"}</div>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">🎯 Daily Goals</h1>
+          <p className="text-gray-600">Set and track your daily micro-goals for consistent progress.</p>
+        </div>
+
+        {/* Stats and Streak Display */}
+        <div className="grid md:grid-cols-3 gap-4 mb-8">
+          <div className="bg-white p-6 rounded-xl shadow-sm">
+            <div className="text-2xl font-bold text-green-600">{completionRate}%</div>
+            <div className="text-sm text-gray-600">completion rate</div>
+            <div className="text-xs text-gray-500 mt-1">
+              {completedGoals.length}/{goals.length} goals completed
+            </div>
+          </div>
+          
+          <div className="bg-white p-6 rounded-xl shadow-sm">
+            <StreakDisplay 
+              userEmail={user?.email || ''} 
+              streakType="goals" 
+              size="large" 
+            />
+          </div>
+          
+          <div className="bg-white p-6 rounded-xl shadow-sm">
+            <div className="text-2xl font-bold text-blue-600">{goals.length}</div>
+            <div className="text-sm text-gray-600">goals today</div>
+            <div className="text-xs text-gray-500 mt-1">
+              {pendingGoals.length} remaining
+            </div>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            className="btn-secondary rounded-md px-3 py-2"
-            onClick={() => router.push('/mood-feed')}
-          >
-            💭 Feed
-          </button>
-          <button
-            className="btn-secondary rounded-md px-3 py-2"
-            onClick={() => router.push('/journal')}
-          >
-            📔 Journal
-          </button>
-          <button
-            className="btn-secondary rounded-md px-3 py-2"
-            onClick={async () => {
-              if (nextSession) {
-                await nextAuthSignOut({ callbackUrl: '/' });
-                router.push('/');
-                return;
-              }
-              await supabase?.auth.signOut();
-              router.push('/');
-            }}
-          >
-            Sign out
-          </button>
-        </div>
-      </header>
 
-      <main className="max-w-4xl mx-auto mt-8">
         <div className="flex items-center justify-between mb-6">
           <div>
             <h1 className="text-2xl font-semibold mb-2">Daily Goals 🎯</h1>

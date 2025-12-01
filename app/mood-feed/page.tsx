@@ -3,7 +3,7 @@
 import { useEffect, useState, useCallback } from "react";
 import { createBrowserSupabaseClient } from "../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
-import Logo from "../../components/Logo";
+import Navbar from "../../components/Navbar";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 
 const supabase = typeof window !== 'undefined' ? createBrowserSupabaseClient() : null;
@@ -34,7 +34,12 @@ export default function MoodFeedPage() {
   const [user, setUser] = useState<any>(null);
   const [posts, setPosts] = useState<any[]>([]);
   const [selectedMood, setSelectedMood] = useState<any>(null);
+  const [isAnonymous, setIsAnonymous] = useState(false);
+  const [newPost, setNewPost] = useState('');
   const [postReactions, setPostReactions] = useState<{[key: string]: any}>({});
+  const [postComments, setPostComments] = useState<{[key: string]: any[]}>({});
+  const [showComments, setShowComments] = useState<{[key: string]: boolean}>({});
+  const [newComment, setNewComment] = useState<{[key: string]: string}>({});
   const router = useRouter();
 
   const loadPosts = useCallback(async () => {
@@ -70,7 +75,49 @@ export default function MoodFeedPage() {
         }));
       }
     } catch (e) {
-      // ignore reaction loading errors
+      console.log('Failed to load reactions for', postId);
+    }
+  };
+
+  const loadPostComments = async (postId: string) => {
+    try {
+      const res = await fetch(`/api/comments?post_id=${postId}`);
+      const data = await res.json();
+      if (res.ok) {
+        setPostComments(prev => ({
+          ...prev,
+          [postId]: data.comments || []
+        }));
+      }
+    } catch (e) {
+      console.log('Failed to load comments for', postId);
+    }
+  };
+
+  const addComment = async (postId: string, content: string, anonymous: boolean) => {
+    try {
+      const res = await fetch('/api/comments', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          post_id: postId,
+          content,
+          anonymous,
+          user_email: user?.email
+        })
+      });
+      
+      if (res.ok) {
+        // Reload comments
+        await loadPostComments(postId);
+        // Clear comment input
+        setNewComment(prev => ({ ...prev, [postId]: '' }));
+      } else {
+        const error = await res.json();
+        alert(error.error || 'Failed to add comment');
+      }
+    } catch (e) {
+      alert('Failed to add comment');
     }
   };
 
@@ -158,54 +205,31 @@ export default function MoodFeedPage() {
     }
   }, [user, loadPosts]);
 
-  if (loading) return <div className="p-8">Loading...</div>;
-
-  return (
-    <div className="min-h-screen p-8">
-      <header className="max-w-4xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Logo size={40} />
-          <div>
-            <div className="text-sm text-[var(--feelup-muted)]">Signed in as</div>
-            <div className="font-semibold">{user?.user_metadata?.full_name || user?.email || "Anonymous"}</div>
-            <div className="text-xs text-[var(--feelup-muted)]">{user?.email}</div>
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="animate-spin w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your mood feed...</p>
           </div>
         </div>
-        <div className="flex gap-2">
-          <button
-            className="btn-secondary rounded-md px-3 py-2"
-            onClick={() => router.push('/journal')}
-          >
-            📔 Journal
-          </button>
-          <button
-            className="btn-secondary rounded-md px-3 py-2"
-            onClick={() => router.push('/goals')}
-          >
-            📅 Goals
-          </button>
-          <button
-            className="btn-secondary rounded-md px-3 py-2"
-            onClick={async () => {
-              if (nextSession) {
-                await nextAuthSignOut({ callbackUrl: '/' });
-                router.push('/');
-                return;
-              }
-              await supabase?.auth.signOut();
-              router.push('/');
-            }}
-          >
-            Sign out
-          </button>
-        </div>
-      </header>
+      </div>
+    );
+  }
 
-      <main className="max-w-4xl mx-auto mt-8">
-        <h1 className="text-2xl font-semibold mb-4">Mood Feed ✨</h1>
-        <p className="text-[var(--feelup-muted)] mb-6">Share your feelings and support others in our positive community.</p>
+  return (
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">✨ Mood Feed</h1>
+          <p className="text-gray-600">Share your feelings and support others in our positive community.</p>
+        </div>
         
-        <section className="mb-8 bg-white rounded-xl p-6 soft-glow">
+        <section className="mb-8 bg-white rounded-xl p-6 shadow-sm">
           <form
             onSubmit={async (e) => {
               e.preventDefault();
@@ -347,7 +371,77 @@ export default function MoodFeedPage() {
                     </button>
                   );
                 })}
+                
+                {/* Comment Toggle Button */}
+                <button
+                  className="flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 ml-auto"
+                  onClick={() => {
+                    const isCurrentlyShowing = showComments[post.id];
+                    setShowComments(prev => ({ ...prev, [post.id]: !isCurrentlyShowing }));
+                    if (!isCurrentlyShowing && !postComments[post.id]) {
+                      loadPostComments(post.id);
+                    }
+                  }}
+                >
+                  <span>💬</span>
+                  <span>Comments</span>
+                  {(postComments[post.id]?.length || 0) > 0 && (
+                    <span className="font-medium">({postComments[post.id].length})</span>
+                  )}
+                </button>
               </div>
+
+              {/* Comments Section */}
+              {showComments[post.id] && (
+                <div className="mt-4 pt-4 border-t border-gray-100">
+                  {/* Existing Comments */}
+                  <div className="space-y-3 mb-4">
+                    {postComments[post.id]?.map((comment) => (
+                      <div key={comment.id} className="flex gap-2">
+                        <div className="w-6 h-6 rounded-full bg-gradient-to-br from-green-400 to-blue-500 flex items-center justify-center text-white text-xs">
+                          {comment.anonymous ? '😊' : (comment.profiles?.full_name?.[0] || comment.user_email?.[0] || '?').toUpperCase()}
+                        </div>
+                        <div className="flex-1">
+                          <div className="bg-gray-50 rounded-lg px-3 py-2">
+                            <div className="text-xs text-gray-500 mb-1">
+                              {comment.anonymous ? 'Someone' : comment.profiles?.full_name || comment.user_email || 'Anonymous'}
+                              <span className="ml-2">{new Date(comment.created_at).toLocaleString()}</span>
+                            </div>
+                            <div className="text-sm text-gray-800">{comment.content}</div>
+                          </div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  {/* Add Comment Form */}
+                  <form 
+                    onSubmit={(e) => {
+                      e.preventDefault();
+                      const content = newComment[post.id]?.trim();
+                      if (content) {
+                        addComment(post.id, content, false);
+                      }
+                    }}
+                    className="flex gap-2"
+                  >
+                    <input
+                      type="text"
+                      value={newComment[post.id] || ''}
+                      onChange={(e) => setNewComment(prev => ({ ...prev, [post.id]: e.target.value }))}
+                      placeholder="Add a supportive comment..."
+                      className="flex-1 px-3 py-2 border border-gray-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      maxLength={200}
+                    />
+                    <button
+                      type="submit"
+                      className="px-4 py-2 bg-blue-500 text-white rounded-lg text-sm hover:bg-blue-600 transition-colors"
+                    >
+                      💕 Send
+                    </button>
+                  </form>
+                </div>
+              )}
             </article>
           ))}
         </section>

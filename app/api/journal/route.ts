@@ -50,7 +50,7 @@ export async function GET(req: Request) {
 
 export async function POST(req: Request) {
   try {
-    const { user_email, title, content, mood, mood_emoji, tags, is_gratitude } = await req.json();
+    const { user_email, title, content, mood, mood_emoji, energy_level, tags, is_gratitude, can_convert_to_post } = await req.json();
     
     if (!user_email || !content?.trim()) {
       return NextResponse.json({ error: 'User email and content are required' }, { status: 400 });
@@ -77,8 +77,10 @@ export async function POST(req: Request) {
         content: content.trim(),
         mood: mood || null,
         mood_emoji: mood_emoji || null,
+        energy_level: energy_level || null,
         tags: tags || [],
-        is_gratitude: !!is_gratitude
+        is_gratitude: !!is_gratitude,
+        can_convert_to_post: !!can_convert_to_post
       })
       .select()
       .single();

@@ -3,25 +3,38 @@
 import { useEffect, useState } from "react";
 import { createBrowserSupabaseClient } from "../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
-import Logo from "../../components/Logo";
+import Navbar from "../../components/Navbar";
+import StreakDisplay from "../../components/StreakDisplay";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 
 const supabase = typeof window !== 'undefined' ? createBrowserSupabaseClient() : null;
 
-// Mood options with emojis
+// Enhanced mood options with emojis and colors
 const moodOptions = [
-  { label: 'Happy', emoji: '😊' },
-  { label: 'Calm', emoji: '😌' },
-  { label: 'Excited', emoji: '🤩' },
-  { label: 'Grateful', emoji: '🙏' },
-  { label: 'Thoughtful', emoji: '🤔' },
-  { label: 'Curious', emoji: '🤷‍♀️' },
-  { label: 'Peaceful', emoji: '☮️' },
-  { label: 'Hopeful', emoji: '🌟' },
-  { label: 'Sad', emoji: '😔' },
-  { label: 'Anxious', emoji: '😰' },
-  { label: 'Tired', emoji: '😴' },
-  { label: 'Overwhelmed', emoji: '😵‍💫' },
+  { label: 'Happy', emoji: '😊', color: '#fbbf24' },
+  { label: 'Calm', emoji: '😌', color: '#60a5fa' },
+  { label: 'Excited', emoji: '🤩', color: '#f472b6' },
+  { label: 'Grateful', emoji: '🙏', color: '#34d399' },
+  { label: 'Thoughtful', emoji: '🤔', color: '#a78bfa' },
+  { label: 'Curious', emoji: '🤷‍♀️', color: '#fb7185' },
+  { label: 'Peaceful', emoji: '☮️', color: '#10b981' },
+  { label: 'Hopeful', emoji: '🌟', color: '#fbbf24' },
+  { label: 'Motivated', emoji: '💪', color: '#ef4444' },
+  { label: 'Creative', emoji: '🎨', color: '#8b5cf6' },
+  { label: 'Reflective', emoji: '🌙', color: '#6366f1' },
+  { label: 'Energetic', emoji: '⚡', color: '#f59e0b' },
+  { label: 'Sad', emoji: '😔', color: '#94a3b8' },
+  { label: 'Anxious', emoji: '😰', color: '#fb7185' },
+  { label: 'Tired', emoji: '😴', color: '#6b7280' },
+  { label: 'Overwhelmed', emoji: '😵‍💫', color: '#f87171' },
+];
+
+const energyLevels = [
+  { value: 1, label: 'Very Low', emoji: '😴', color: '#6b7280' },
+  { value: 2, label: 'Low', emoji: '😔', color: '#9ca3af' },
+  { value: 3, label: 'Medium', emoji: '😐', color: '#60a5fa' },
+  { value: 4, label: 'High', emoji: '😊', color: '#34d399' },
+  { value: 5, label: 'Very High', emoji: '🚀', color: '#f59e0b' },
 ];
 
 // Predefined tags
@@ -39,8 +52,10 @@ export default function JournalPage() {
   const [showNewEntry, setShowNewEntry] = useState(false);
   const [showGratitude, setShowGratitude] = useState(false);
   const [selectedMood, setSelectedMood] = useState<any>(null);
+  const [energyLevel, setEnergyLevel] = useState<number | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customTag, setCustomTag] = useState('');
+  const [canConvertToPost, setCanConvertToPost] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<'journal' | 'gratitude'>('journal');
   const router = useRouter();
 
@@ -77,8 +92,10 @@ export default function JournalPage() {
       content: fd.get('content') as string,
       mood: selectedMood?.label,
       mood_emoji: selectedMood?.emoji,
+      energy_level: energyLevel,
       tags: selectedTags,
-      is_gratitude: isGratitude
+      is_gratitude: isGratitude,
+      can_convert_to_post: canConvertToPost
     };
 
     try {
@@ -93,8 +110,10 @@ export default function JournalPage() {
         setShowNewEntry(false);
         setShowGratitude(false);
         setSelectedMood(null);
+        setEnergyLevel(null);
         setSelectedTags([]);
         setCustomTag('');
+        setCanConvertToPost(false);
         await loadEntries();
       } else {
         const error = await res.json();
@@ -176,56 +195,30 @@ export default function JournalPage() {
     }
   }, [user]);
 
-  if (loading) return <div className="p-8">Loading...</div>;
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-50">
+        <Navbar />
+        <div className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <div className="animate-spin w-8 h-8 border-2 border-purple-600 border-t-transparent rounded-full mx-auto mb-4"></div>
+            <p className="text-gray-600">Loading your journal...</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const currentEntries = activeTab === 'journal' ? entries : gratitudeEntries;
 
   return (
-    <div className="min-h-screen p-8">
-      <header className="max-w-4xl mx-auto flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <Logo size={40} />
-          <div>
-            <div className="text-sm text-[var(--feelup-muted)]">Feel Journal</div>
-            <div className="font-semibold">{user?.user_metadata?.full_name || user?.email || "Anonymous"}</div>
-          </div>
-        </div>
-        <div className="flex gap-2">
-          <button
-            className="btn-secondary rounded-md px-3 py-2"
-            onClick={() => router.push('/mood-feed')}
-          >
-            💭 Feed
-          </button>
-          <button
-            className="btn-secondary rounded-md px-3 py-2"
-            onClick={() => router.push('/goals')}
-          >
-            📅 Goals
-          </button>
-          <button
-            className="btn-secondary rounded-md px-3 py-2"
-            onClick={async () => {
-              if (nextSession) {
-                await nextAuthSignOut({ callbackUrl: '/' });
-                router.push('/');
-                return;
-              }
-              await supabase?.auth.signOut();
-              router.push('/');
-            }}
-          >
-            Sign out
-          </button>
-        </div>
-      </header>
-
-      <main className="max-w-4xl mx-auto mt-8">
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-semibold mb-2">Feel Journal 📔</h1>
-            <p className="text-[var(--feelup-muted)]">Your private space for thoughts, reflections, and gratitude</p>
-          </div>
+    <div className="min-h-screen bg-gray-50">
+      <Navbar />
+      
+      <main className="max-w-4xl mx-auto px-4 py-8">
+        <div className="mb-8">
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">📝 Feel Journal</h1>
+          <p className="text-gray-600">Your private space for thoughts, reflections, and gratitude.</p>
         </div>
 
         {/* Tab Navigation */}
@@ -318,6 +311,29 @@ export default function JournalPage() {
                 </div>
               </div>
 
+              {/* Energy Level Selection */}
+              <div>
+                <label className="block text-sm font-medium mb-2">Energy level:</label>
+                <div className="flex gap-2">
+                  {energyLevels.map((level) => (
+                    <button
+                      key={level.value}
+                      type="button"
+                      className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-sm transition-all ${
+                        energyLevel === level.value
+                          ? 'bg-green-100 border-2 border-green-300 transform scale-105'
+                          : 'bg-gray-100 border border-gray-300 hover:bg-gray-200 hover:scale-105'
+                      }`}
+                      onClick={() => setEnergyLevel(energyLevel === level.value ? null : level.value)}
+                      style={{ backgroundColor: energyLevel === level.value ? level.color + '20' : undefined }}
+                    >
+                      <span className="text-lg">{level.emoji}</span>
+                      <span className="text-xs">{level.label}</span>
+                    </button>
+                  ))}
+                </div>
+              </div>
+
               {/* Tags */}
               <div>
                 <label className="block text-sm font-medium mb-2">Tags:</label>
@@ -361,6 +377,22 @@ export default function JournalPage() {
                   </div>
                 )}
               </div>
+
+              {/* Convert to Post Option */}
+              {!showGratitude && (
+                <div className="flex items-center gap-2">
+                  <input
+                    type="checkbox"
+                    id="canConvertToPost"
+                    checked={canConvertToPost}
+                    onChange={(e) => setCanConvertToPost(e.target.checked)}
+                    className="rounded"
+                  />
+                  <label htmlFor="canConvertToPost" className="text-sm text-gray-700">
+                    Allow this entry to be shared as a mood post
+                  </label>
+                </div>
+              )}
 
               <div className="flex gap-2">
                 <button type="submit" className="btn-primary rounded-xl px-4 py-2">
@@ -412,7 +444,7 @@ export default function JournalPage() {
                     </div>
                   </div>
                 </div>
-                {!entry.is_gratitude && (
+                {!entry.is_gratitude && entry.can_convert_to_post && (
                   <button
                     onClick={() => convertToPost(entry)}
                     className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded-md transition-colors"
@@ -440,9 +472,16 @@ export default function JournalPage() {
                 </div>
               )}
 
-              {entry.mood && (
-                <div className="text-sm text-gray-600">
-                  Mood: {entry.mood_emoji} {entry.mood}
+              {(entry.mood || entry.energy_level) && (
+                <div className="flex flex-wrap gap-4 text-sm text-gray-600">
+                  {entry.mood && (
+                    <span>Mood: {entry.mood_emoji} {entry.mood}</span>
+                  )}
+                  {entry.energy_level && (
+                    <span>
+                      Energy: {energyLevels.find(l => l.value === entry.energy_level)?.emoji} {energyLevels.find(l => l.value === entry.energy_level)?.label}
+                    </span>
+                  )}
                 </div>
               )}
             </article>
