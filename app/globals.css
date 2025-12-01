@@ -24,14 +24,6 @@ body {
   background: linear-gradient(180deg, #f3fbff 0%, #ffffff 100%);
   color: var(--foreground);
   font-family: Inter, Arial, Helvetica, sans-serif;
-  
-  /* Optimize for loading */
-  opacity: 0;
-  transition: opacity 0.3s ease-in-out;
-}
-
-body.loaded {
-  opacity: 1;
 }
 
 /* Loading skeleton for better UX */
