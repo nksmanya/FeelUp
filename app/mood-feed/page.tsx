@@ -1,12 +1,11 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { createBrowserSupabaseClient } from "../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import Footer from "../../components/Footer";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
-
-const supabase = typeof window !== 'undefined' ? createBrowserSupabaseClient() : null;
 
 // Mood options with emojis and colors
 const moodOptions = [
@@ -41,6 +40,14 @@ export default function MoodFeedPage() {
   const [showComments, setShowComments] = useState<{[key: string]: boolean}>({});
   const [newComment, setNewComment] = useState<{[key: string]: string}>({});
   const router = useRouter();
+
+  // Initialize supabase client on client-side only
+  const supabase = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return createBrowserSupabaseClient();
+    }
+    return null;
+  }, []);
 
   const loadPosts = useCallback(async () => {
     try {
@@ -146,7 +153,10 @@ export default function MoodFeedPage() {
 
   useEffect(() => {
     const checkAuth = async () => {
-      setLoading(true);
+      // Only set loading if we don't already have a user
+      if (!user) {
+        setLoading(true);
+      }
       
       // Check NextAuth session first (OAuth)
       if (nextSession?.user?.email) {
@@ -192,15 +202,15 @@ export default function MoodFeedPage() {
       }
     };
 
-    // Only run auth check if NextAuth has finished loading
-    if (nextSessionStatus !== 'loading') {
+    // Only run auth check if NextAuth has finished loading and we don't have a user
+    if (nextSessionStatus !== 'loading' && !user) {
       checkAuth();
     }
-  }, [nextSession, nextSessionStatus, router]);
+  }, [nextSession, nextSessionStatus, router, user]);
 
-  // Load posts when user is available
+  // Load posts when user is available (with caching to prevent reload)
   useEffect(() => {
-    if (user?.email) {
+    if (user?.email && posts.length === 0) {
       loadPosts().catch(e => console.log('Posts loading failed:', e));
     }
   }, [user, loadPosts]);
@@ -446,6 +456,7 @@ export default function MoodFeedPage() {
           ))}
         </section>
       </main>
+      <Footer />
     </div>
   );
 }

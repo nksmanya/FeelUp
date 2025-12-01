@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import { createBrowserSupabaseClient } from "../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import StreakDisplay from "../../components/StreakDisplay";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
-
-const supabase = typeof window !== 'undefined' ? createBrowserSupabaseClient() : null;
 
 // Goal categories with emojis
 const goalCategories = [
@@ -32,14 +30,29 @@ const completionMoods = [
 export default function GoalsPage() {
   const { data: nextSession } = useSession();
   const [loading, setLoading] = useState(true);
+  const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [goals, setGoals] = useState<any[]>([]);
-  const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [selectedDate, setSelectedDate] = useState('');
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [completingGoal, setCompletingGoal] = useState<any>(null);
   const router = useRouter();
 
-  const loadGoals = async (date: string = selectedDate) => {
+  // Initialize supabase client on client-side only
+  const supabase = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return createBrowserSupabaseClient();
+    }
+    return null;
+  }, []);
+
+  // Set date after component mounts to prevent hydration mismatch
+  useEffect(() => {
+    setMounted(true);
+    setSelectedDate(new Date().toISOString().split('T')[0]);
+  }, []);
+
+  const loadGoals = useCallback(async (date: string = selectedDate) => {
     if (!user?.email) return;
     
     try {
@@ -51,7 +64,7 @@ export default function GoalsPage() {
     } catch (e) {
       console.error('Failed to load goals:', e);
     }
-  };
+  }, [user?.email, selectedDate]);
 
   const addGoal = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -121,10 +134,11 @@ export default function GoalsPage() {
         // Check for achievements
         try {
           const completedCount = goals.filter(g => g.completed_at).length + 1;
+          const today = new Date().toDateString();
           const completedToday = goals.filter(g => {
             if (!g.completed_at) return false;
             const completedDate = new Date(g.completed_at).toDateString();
-            return completedDate === new Date().toDateString();
+            return completedDate === today;
           }).length + 1;
 
           await fetch('/api/achievements', {
@@ -154,7 +168,12 @@ export default function GoalsPage() {
   useEffect(() => {
     let mounted = true;
 
-    (async () => {
+    const checkAuth = async () => {
+      // Only set loading if we don't already have a user
+      if (!user) {
+        setLoading(true);
+      }
+
       if (nextSession?.user?.email) {
         const u = nextSession.user as any;
         setUser({ email: u.email, user_metadata: { full_name: u.name } });
@@ -171,14 +190,19 @@ export default function GoalsPage() {
       }
       if (mounted) setUser(session.user);
       setLoading(false);
-    })();
-  }, [nextSession, router]);
+    };
+
+    // Only check auth if we don't have a user
+    if (!user) {
+      checkAuth();
+    }
+  }, [nextSession, router, user]);
 
   useEffect(() => {
-    if (user?.email) {
+    if (user?.email && goals.length === 0) {
       loadGoals();
     }
-  }, [user, selectedDate]);
+  }, [user, loadGoals, goals.length]);
 
   if (loading) {
     return (

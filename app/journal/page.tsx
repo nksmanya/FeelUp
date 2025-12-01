@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { createBrowserSupabaseClient } from "../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import StreakDisplay from "../../components/StreakDisplay";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
-
-const supabase = typeof window !== 'undefined' ? createBrowserSupabaseClient() : null;
 
 // Enhanced mood options with emojis and colors
 const moodOptions = [
@@ -59,7 +57,15 @@ export default function JournalPage() {
   const [activeTab, setActiveTab] = useState<'journal' | 'gratitude'>('journal');
   const router = useRouter();
 
-  const loadEntries = async () => {
+  // Initialize supabase client on client-side only
+  const supabase = useMemo(() => {
+    if (typeof window !== 'undefined') {
+      return createBrowserSupabaseClient();
+    }
+    return null;
+  }, []);
+
+  const loadEntries = useCallback(async () => {
     if (!user?.email) return;
     
     try {
@@ -79,7 +85,7 @@ export default function JournalPage() {
     } catch (e) {
       console.error('Failed to load entries:', e);
     }
-  };
+  }, [user?.email]);
 
   const addEntry = async (e: React.FormEvent, isGratitude = false) => {
     e.preventDefault();
@@ -169,7 +175,12 @@ export default function JournalPage() {
   useEffect(() => {
     let mounted = true;
 
-    (async () => {
+    const checkAuth = async () => {
+      // Only set loading if we don't already have a user
+      if (!user) {
+        setLoading(true);
+      }
+
       if (nextSession?.user?.email) {
         const u = nextSession.user as any;
         setUser({ email: u.email, user_metadata: { full_name: u.name } });
@@ -186,14 +197,19 @@ export default function JournalPage() {
       }
       if (mounted) setUser(session.user);
       setLoading(false);
-    })();
-  }, [nextSession, router]);
+    };
+
+    // Only check auth if we don't have a user
+    if (!user) {
+      checkAuth();
+    }
+  }, [nextSession, router, user]);
 
   useEffect(() => {
-    if (user?.email) {
+    if (user?.email && entries.length === 0 && gratitudeEntries.length === 0) {
       loadEntries();
     }
-  }, [user]);
+  }, [user, loadEntries, entries.length, gratitudeEntries.length]);
 
   if (loading) {
     return (

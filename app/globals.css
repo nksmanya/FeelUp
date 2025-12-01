@@ -14,12 +14,40 @@
 
 /* Intentionally light-only theme: no dark-mode overrides to keep the UI calm and bright */
 
+/* Prevent loading flashes and improve perceived performance */
+html {
+  scroll-behavior: smooth;
+}
 
 body {
   /* Very light, calming background — soft blue to white */
   background: linear-gradient(180deg, #f3fbff 0%, #ffffff 100%);
   color: var(--foreground);
   font-family: Inter, Arial, Helvetica, sans-serif;
+  
+  /* Optimize for loading */
+  opacity: 0;
+  transition: opacity 0.3s ease-in-out;
+}
+
+body.loaded {
+  opacity: 1;
+}
+
+/* Loading skeleton for better UX */
+@keyframes shimmer {
+  0% {
+    background-position: -200px 0;
+  }
+  100% {
+    background-position: calc(200px + 100%) 0;
+  }
+}
+
+.skeleton {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200px 100%;
+  animation: shimmer 1.5s infinite;
 }
 
 /* Calm theme tokens */

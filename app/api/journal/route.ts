@@ -14,21 +14,10 @@ export async function GET(req: Request) {
     
     const supabase = createServerSupabaseClient();
     
-    // Get user profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('email', user_email)
-      .single();
-    
-    if (!profile) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-    
     let query = supabase
       .from('journal_entries')
       .select('*')
-      .eq('user_id', profile.id)
+      .eq('user_email', user_email)
       .order('created_at', { ascending: false })
       .limit(limit);
     
@@ -58,39 +47,30 @@ export async function POST(req: Request) {
     
     const supabase = createServerSupabaseClient();
     
-    // Get user profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('email', user_email)
-      .single();
-    
-    if (!profile) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-    
     const { data: newEntry, error } = await supabase
       .from('journal_entries')
       .insert({
-        user_id: profile.id,
+        user_email: user_email,
         title: title?.trim() || null,
         content: content.trim(),
-        mood: mood || null,
+        mood_tag: mood || null,
         mood_emoji: mood_emoji || null,
         energy_level: energy_level || null,
         tags: tags || [],
-        is_gratitude: !!is_gratitude,
-        can_convert_to_post: !!can_convert_to_post
+        is_gratitude: !!is_gratitude
+        // Removed can_convert_to_post temporarily until column is added
       })
       .select()
       .single();
     
     if (error) {
+      console.error('Journal creation error:', error);
       return NextResponse.json({ error: 'Failed to create entry' }, { status: 500 });
     }
     
     return NextResponse.json({ entry: newEntry });
   } catch (err: any) {
+    console.error('Journal API error:', err);
     return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
   }
 }
@@ -105,24 +85,13 @@ export async function PATCH(req: Request) {
     
     const supabase = createServerSupabaseClient();
     
-    // Get user profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('email', user_email)
-      .single();
-    
-    if (!profile) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
-    
     const updateData: any = {
       updated_at: new Date().toISOString()
     };
     
     if (title !== undefined) updateData.title = title?.trim() || null;
     if (content !== undefined) updateData.content = content.trim();
-    if (mood !== undefined) updateData.mood = mood || null;
+    if (mood !== undefined) updateData.mood_tag = mood || null;
     if (mood_emoji !== undefined) updateData.mood_emoji = mood_emoji || null;
     if (tags !== undefined) updateData.tags = tags || [];
     
@@ -130,7 +99,7 @@ export async function PATCH(req: Request) {
       .from('journal_entries')
       .update(updateData)
       .eq('id', entry_id)
-      .eq('user_id', profile.id)
+      .eq('user_email', user_email)
       .select()
       .single();
     
