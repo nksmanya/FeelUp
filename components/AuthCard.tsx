@@ -2,8 +2,11 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { signIn } from "next-auth/react";
 import Logo from "./Logo";
+import { createBrowserSupabaseClient } from "../lib/supabaseClient";
+import { signIn } from "next-auth/react";
+
+const supabase = typeof window !== 'undefined' ? createBrowserSupabaseClient() : null;
 
 export default function AuthCard() {
   const [mode, setMode] = useState<"signin" | "signup">("signin");
@@ -15,43 +18,46 @@ export default function AuthCard() {
 
   async function handleCredentialsSignIn(e: React.FormEvent) {
     e.preventDefault();
+    if (!supabase) return alert('Supabase client not available');
     setLoading(true);
 
-    if (mode === "signup") {
-      const res = await fetch("/api/auth/register", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ name, email, password, acceptTerms }),
-      });
+    try {
+      if (mode === "signup") {
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password,
+          options: {
+            data: { full_name: name },
+            emailRedirectTo: `${window.location.origin}/mood-feed`,
+          },
+        });
 
-      const data = await res.json();
-      if (!res.ok) {
+        if (error) {
+          setLoading(false);
+          return alert(error.message || 'Registration failed');
+        }
+
+        // If signUp requires confirmation, the user may need to confirm via email.
+        // If immediate session exists, redirect; otherwise show a message.
+        if (data?.user) {
+          window.location.href = '/mood-feed';
+        } else {
+          alert('Registration successful. Please check your email to confirm your account.');
+        }
+
         setLoading(false);
-        return alert(data.error || "Registration failed");
+        return;
       }
 
-      // After mock registration, sign the user in automatically and redirect to the feed
-      const signed = await signIn("credentials", { redirect: false, name, email, password } as any);
+      // Sign in
+      const { data, error } = await supabase.auth.signInWithPassword({ email, password });
       setLoading(false);
-      if (!signed || (signed as any).error) return alert((signed as any)?.error || "Sign in failed");
-      window.location.href = "/mood-feed";
-      return;
+      if (error) return alert(error.message || 'Sign in failed');
+      if (data?.session) window.location.href = '/mood-feed';
+    } catch (err: any) {
+      setLoading(false);
+      alert(err?.message || 'An error occurred');
     }
-
-    const result = await signIn("credentials", {
-      redirect: false,
-      email,
-      password,
-    } as any);
-
-    setLoading(false);
-
-    if (!result || (result as any).error) {
-      alert((result as any)?.error || "Sign in failed");
-      return;
-    }
-
-    window.location.href = "/mood-feed";
   }
 
   return (
@@ -119,8 +125,21 @@ export default function AuthCard() {
           </div>
 
           <div className="grid grid-cols-2 gap-3">
-            <button onClick={() => signIn("google", { callbackUrl: '/mood-feed' })} className="rounded-xl px-3 py-2 text-sm btn-secondary" aria-label="Sign in with Google">Google</button>
-            <button onClick={() => signIn("github", { callbackUrl: '/mood-feed' })} className="rounded-xl px-3 py-2 text-sm btn-secondary" aria-label="Sign in with GitHub">GitHub</button>
+            <button
+              onClick={() => signIn("google", { callbackUrl: '/mood-feed' })}
+              className="rounded-xl px-3 py-2 text-sm btn-secondary"
+              aria-label="Sign in with Google"
+            >
+              Google
+            </button>
+
+            <button
+              onClick={() => signIn("github", { callbackUrl: '/mood-feed' })}
+              className="rounded-xl px-3 py-2 text-sm btn-secondary"
+              aria-label="Sign in with GitHub"
+            >
+              GitHub
+            </button>
           </div>
         </div>
       </form>

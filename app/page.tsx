@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Logo from "../components/Logo";
 import HeroStack from "../components/HeroStack";
-import AuthCard from "../components/AuthCard";
+import ClientAuthCard from "../components/ClientAuthCard";
 
 export default function Home() {
   return (
@@ -16,7 +16,7 @@ export default function Home() {
 
         {/* Right: auth card (landing is the login) */}
         <div className="w-full max-w-md md:w-1/2">
-          <AuthCard />
+          <ClientAuthCard />
         </div>
       </div>
     </div>
