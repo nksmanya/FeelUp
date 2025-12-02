@@ -16,7 +16,8 @@ export default function Navbar() {
     { name: 'Goals', href: '/goals', icon: '🎯', description: 'Track progress' },
     { name: 'Journal', href: '/journal', icon: '📝', description: 'Private thoughts' },
     { name: 'Events', href: '/events', icon: '🗓️', description: 'Join activities' },
-    { name: 'Community', href: '/community', icon: '🤝', description: 'Find companions' },
+    { name: 'Explore', href: '/explore', icon: '🔍', description: 'Find friends' },
+    { name: 'Messages', href: '/messages', icon: '💬', description: 'Chat privately' },
     { name: 'Analytics', href: '/analytics', icon: '📊', description: 'Mood insights' },
   ];
 
