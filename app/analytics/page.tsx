@@ -130,7 +130,7 @@ export default function AnalyticsPage() {
     return acc;
   }, {} as { [key: string]: number });
 
-  const topMood = Object.entries(moodCounts).sort(([,a], [,b]) => b - a)[0];
+  const topMood = Object.entries(moodCounts).sort(([,a], [,b]) => (b as number) - (a as number))[0];
 
   return (
     <div className="min-h-screen bg-gray-50">
@@ -224,7 +224,7 @@ export default function AnalyticsPage() {
           <div className="bg-white rounded-xl p-8 soft-glow">
             <h2 className="text-xl font-bold text-gray-900 mb-6">🎭 Mood Distribution</h2>
             <div className="space-y-3">
-              {Object.entries(moodCounts).sort(([,a], [,b]) => b - a).map(([mood, count]) => (
+              {Object.entries(moodCounts).sort(([,a], [,b]) => (b as number) - (a as number)).map(([mood, count]) => (
                 <div key={mood} className="flex items-center gap-3">
                   <div className="text-sm font-medium text-gray-700 w-20">{mood}</div>
                   <div className="flex-1 bg-gray-100 rounded-full h-3 relative overflow-hidden">
@@ -232,11 +232,11 @@ export default function AnalyticsPage() {
                       className="h-full rounded-full transition-all duration-300"
                       style={{ 
                         backgroundColor: moodColors[mood] || '#6b7280',
-                        width: `${(count / moodData.length) * 100}%`
+                        width: `${((count as number) / moodData.length) * 100}%`
                       }}
                     ></div>
                   </div>
-                  <div className="text-sm text-gray-500 w-12">{count} days</div>
+                  <div className="text-sm text-gray-500 w-12">{count as number} days</div>
                 </div>
               ))}
             </div>
@@ -312,7 +312,7 @@ export default function AnalyticsPage() {
         </div>
 
         {/* Development Notice */}
-        <div className="mt-8 bg-gradient-to-r from-blue-50 to-purple-50 rounded-xl p-8 text-center">
+        <div className="mt-8 bg-linear-to-r from-blue-50 to-purple-50 rounded-xl p-8 text-center">
           <h2 className="text-2xl font-bold text-gray-900 mb-4">🚧 Enhanced Analytics Coming Soon</h2>
           <p className="text-gray-700 mb-4 max-w-2xl mx-auto">
             We're developing advanced analytics including trend predictions, goal success patterns, 

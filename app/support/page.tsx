@@ -1,8 +1,10 @@
 'use client';
 
 import { useState } from 'react';
+import { useRouter } from 'next/navigation';
 
 export default function SupportPage() {
+  const router = useRouter();
   const [formData, setFormData] = useState({
     name: '',
     email: '',
@@ -31,7 +33,7 @@ export default function SupportPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-blue-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -246,12 +248,12 @@ export default function SupportPage() {
 
         {/* Navigation */}
         <div className="text-center mt-12">
-          <a
-            href="/"
+          <button
+            onClick={() => router.push('/mood-feed')}
             className="inline-flex items-center text-purple-600 hover:text-purple-800 font-medium"
           >
             ← Back to Home
-          </a>
+          </button>
         </div>
       </div>
     </div>

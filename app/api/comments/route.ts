@@ -1,5 +1,34 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '../../../lib/supabaseClient';
+import fs from 'fs';
+import path from 'path';
+
+// Mock database using JSON file for development
+const DB_PATH = path.join(process.cwd(), 'data', 'comments.json');
+
+function ensureDataDir() {
+  const dataDir = path.dirname(DB_PATH);
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+}
+
+function readComments() {
+  ensureDataDir();
+  if (!fs.existsSync(DB_PATH)) {
+    return [];
+  }
+  try {
+    const data = fs.readFileSync(DB_PATH, 'utf-8');
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+}
+
+function writeComments(comments: any[]) {
+  ensureDataDir();
+  fs.writeFileSync(DB_PATH, JSON.stringify(comments, null, 2));
+}
 
 export async function GET(req: Request) {
   try {
@@ -10,20 +39,15 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'Missing post_id' }, { status: 400 });
     }
 
-    const supabase = createServerSupabaseClient();
+    const allComments = readComments();
+    const postComments = allComments.filter((comment: any) => comment.post_id === postId);
     
-    const { data, error } = await supabase
-      .from('post_comments')
-      .select(`
-        id, content, anonymous, user_email, created_at,
-        profiles!post_comments_user_email_fkey(full_name, avatar_url)
-      `)
-      .eq('post_id', postId)
-      .order('created_at', { ascending: true });
+    // Sort by created_at ascending
+    postComments.sort((a: any, b: any) => new Date(a.created_at).getTime() - new Date(b.created_at).getTime());
     
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ comments: data });
+    return NextResponse.json({ comments: postComments });
   } catch (err: any) {
+    console.error('Comments GET error:', err);
     return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
   }
 }
@@ -48,18 +72,27 @@ export async function POST(req: Request) {
       }, { status: 400 });
     }
 
-    const supabase = createServerSupabaseClient();
-    
-    const { data, error } = await supabase.from('post_comments').insert([{
-      post_id,
+    const allComments = readComments();
+    const newComment = {
+      id: Date.now().toString(),
+      post_id: post_id,
       content: content.trim(),
       anonymous: !!anonymous,
-      user_email: anonymous ? null : user_email
-    }]).select().single();
-
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ comment: data });
+      user_email: anonymous ? null : user_email,
+      created_at: new Date().toISOString(),
+      profiles: anonymous ? null : {
+        full_name: user_email?.split('@')[0] || 'Anonymous User',
+        avatar_url: null
+      }
+    };
+    
+    allComments.push(newComment);
+    writeComments(allComments);
+    
+    console.log('Comment created successfully:', newComment);
+    return NextResponse.json({ comment: newComment });
   } catch (err: any) {
+    console.error('Comments POST error:', err);
     return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
   }
 }

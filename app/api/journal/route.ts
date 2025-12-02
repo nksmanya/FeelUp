@@ -1,5 +1,34 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '../../../lib/supabaseClient';
+import fs from 'fs';
+import path from 'path';
+
+// Mock database using JSON file for development
+const DB_PATH = path.join(process.cwd(), 'data', 'journal_entries.json');
+
+function ensureDataDir() {
+  const dataDir = path.dirname(DB_PATH);
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+}
+
+function readEntries() {
+  ensureDataDir();
+  if (!fs.existsSync(DB_PATH)) {
+    return [];
+  }
+  try {
+    const data = fs.readFileSync(DB_PATH, 'utf-8');
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+}
+
+function writeEntries(entries: any[]) {
+  ensureDataDir();
+  fs.writeFileSync(DB_PATH, JSON.stringify(entries, null, 2));
+}
 
 export async function GET(req: Request) {
   try {
@@ -12,27 +41,20 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: 'User email required' }, { status: 400 });
     }
     
-    const supabase = createServerSupabaseClient();
-    
-    let query = supabase
-      .from('journal_entries')
-      .select('*')
-      .eq('user_email', user_email)
-      .order('created_at', { ascending: false })
-      .limit(limit);
+    const allEntries = readEntries();
+    let userEntries = allEntries.filter((entry: any) => entry.user_email === user_email);
     
     if (is_gratitude) {
-      query = query.eq('is_gratitude', true);
+      userEntries = userEntries.filter((entry: any) => entry.is_gratitude === true);
     }
     
-    const { data: entries, error } = await query;
+    // Sort by created_at descending and limit
+    userEntries.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    userEntries = userEntries.slice(0, limit);
     
-    if (error) {
-      return NextResponse.json({ error: 'Failed to fetch entries' }, { status: 500 });
-    }
-    
-    return NextResponse.json({ entries: entries || [] });
+    return NextResponse.json({ entries: userEntries });
   } catch (err: any) {
+    console.error('Journal GET error:', err);
     return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
   }
 }
@@ -45,32 +67,29 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'User email and content are required' }, { status: 400 });
     }
     
-    const supabase = createServerSupabaseClient();
+    const allEntries = readEntries();
+    const newEntry = {
+      id: Date.now().toString(), // Simple ID generation
+      user_email: user_email,
+      title: title?.trim() || null,
+      content: content.trim(),
+      mood_tag: mood || null,
+      mood_emoji: mood_emoji || null,
+      energy_level: energy_level || null,
+      tags: tags || [],
+      is_gratitude: !!is_gratitude,
+      can_convert_to_post: !!can_convert_to_post,
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    };
     
-    const { data: newEntry, error } = await supabase
-      .from('journal_entries')
-      .insert({
-        user_email: user_email,
-        title: title?.trim() || null,
-        content: content.trim(),
-        mood_tag: mood || null,
-        mood_emoji: mood_emoji || null,
-        energy_level: energy_level || null,
-        tags: tags || [],
-        is_gratitude: !!is_gratitude
-        // Removed can_convert_to_post temporarily until column is added
-      })
-      .select()
-      .single();
+    allEntries.push(newEntry);
+    writeEntries(allEntries);
     
-    if (error) {
-      console.error('Journal creation error:', error);
-      return NextResponse.json({ error: 'Failed to create entry' }, { status: 500 });
-    }
-    
+    console.log('Journal entry created successfully:', newEntry);
     return NextResponse.json({ entry: newEntry });
   } catch (err: any) {
-    console.error('Journal API error:', err);
+    console.error('Journal POST error:', err);
     return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
   }
 }
@@ -83,32 +102,32 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: 'Entry ID and user email required' }, { status: 400 });
     }
     
-    const supabase = createServerSupabaseClient();
+    const allEntries = readEntries();
+    const entryIndex = allEntries.findIndex((entry: any) => 
+      entry.id === entry_id && entry.user_email === user_email
+    );
     
-    const updateData: any = {
-      updated_at: new Date().toISOString()
-    };
-    
-    if (title !== undefined) updateData.title = title?.trim() || null;
-    if (content !== undefined) updateData.content = content.trim();
-    if (mood !== undefined) updateData.mood_tag = mood || null;
-    if (mood_emoji !== undefined) updateData.mood_emoji = mood_emoji || null;
-    if (tags !== undefined) updateData.tags = tags || [];
-    
-    const { data: updatedEntry, error } = await supabase
-      .from('journal_entries')
-      .update(updateData)
-      .eq('id', entry_id)
-      .eq('user_email', user_email)
-      .select()
-      .single();
-    
-    if (error) {
-      return NextResponse.json({ error: 'Failed to update entry' }, { status: 500 });
+    if (entryIndex === -1) {
+      return NextResponse.json({ error: 'Entry not found' }, { status: 404 });
     }
     
-    return NextResponse.json({ entry: updatedEntry });
+    const entry = allEntries[entryIndex];
+    
+    // Update fields
+    if (title !== undefined) entry.title = title?.trim() || null;
+    if (content !== undefined) entry.content = content.trim();
+    if (mood !== undefined) entry.mood_tag = mood || null;
+    if (mood_emoji !== undefined) entry.mood_emoji = mood_emoji || null;
+    if (tags !== undefined) entry.tags = tags || [];
+    
+    entry.updated_at = new Date().toISOString();
+    
+    allEntries[entryIndex] = entry;
+    writeEntries(allEntries);
+    
+    return NextResponse.json({ entry: entry });
   } catch (err: any) {
+    console.error('Journal PATCH error:', err);
     return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
   }
 }

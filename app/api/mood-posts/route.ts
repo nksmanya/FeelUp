@@ -1,5 +1,34 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '../../../lib/supabaseClient';
+import fs from 'fs';
+import path from 'path';
+
+// Mock database using JSON file for development
+const DB_PATH = path.join(process.cwd(), 'data', 'mood_posts.json');
+
+function ensureDataDir() {
+  const dataDir = path.dirname(DB_PATH);
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+}
+
+function readPosts() {
+  ensureDataDir();
+  if (!fs.existsSync(DB_PATH)) {
+    return [];
+  }
+  try {
+    const data = fs.readFileSync(DB_PATH, 'utf-8');
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+}
+
+function writePosts(posts: any[]) {
+  ensureDataDir();
+  fs.writeFileSync(DB_PATH, JSON.stringify(posts, null, 2));
+}
 
 export async function GET(req: Request) {
   try {
@@ -7,27 +36,21 @@ export async function GET(req: Request) {
     const limit = parseInt(url.searchParams.get('limit') || '20', 10);
     const visibility = url.searchParams.get('visibility') || 'public';
 
-    const supabase = createServerSupabaseClient();
+    const allPosts = readPosts();
+    let filteredPosts = allPosts;
     
-    let query = supabase
-      .from('mood_posts')
-      .select(`
-        id, content, mood, mood_emoji, mood_color, visibility, anonymous, owner_email, created_at,
-        profiles!mood_posts_owner_id_fkey(full_name, avatar_url)
-      `)
-      .order('created_at', { ascending: false })
-      .limit(limit);
-    
-    // Filter by visibility (for now just public posts)
+    // Filter by visibility
     if (visibility === 'public') {
-      query = query.eq('visibility', 'public');
+      filteredPosts = allPosts.filter((post: any) => post.visibility === 'public');
     }
-
-    const { data, error } = await query;
     
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ posts: data });
+    // Sort by created_at descending and limit
+    filteredPosts.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    filteredPosts = filteredPosts.slice(0, limit);
+    
+    return NextResponse.json({ posts: filteredPosts });
   } catch (err: any) {
+    console.error('Mood posts GET error:', err);
     return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
   }
 }
@@ -41,20 +64,9 @@ export async function POST(req: Request) {
       return NextResponse.json({ error: 'Missing content' }, { status: 400 });
     }
 
-    const supabase = createServerSupabaseClient();
-    
-    // Get user profile for owner_id if not anonymous
-    let owner_id = null;
-    if (owner_email && !anonymous) {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('id')
-        .eq('email', owner_email)
-        .single();
-      owner_id = profile?.id;
-    }
-    
-    const { data, error } = await supabase.from('mood_posts').insert([{
+    const allPosts = readPosts();
+    const newPost = {
+      id: Date.now().toString(),
       content: content.trim(),
       mood: mood || null,
       mood_emoji: mood_emoji || null,
@@ -62,12 +74,20 @@ export async function POST(req: Request) {
       visibility: visibility || 'public',
       anonymous: !!anonymous,
       owner_email: anonymous ? null : owner_email || null,
-      owner_id: anonymous ? null : owner_id
-    }]).select().single();
-
-    if (error) return NextResponse.json({ error: error.message }, { status: 500 });
-    return NextResponse.json({ post: data });
+      created_at: new Date().toISOString(),
+      profiles: anonymous ? null : {
+        full_name: owner_email?.split('@')[0] || 'Anonymous User',
+        avatar_url: null
+      }
+    };
+    
+    allPosts.push(newPost);
+    writePosts(allPosts);
+    
+    console.log('Mood post created successfully:', newPost);
+    return NextResponse.json({ post: newPost });
   } catch (err: any) {
+    console.error('Mood posts POST error:', err);
     return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
   }
 }

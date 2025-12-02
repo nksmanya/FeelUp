@@ -1,6 +1,12 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+
 export default function CommunityGuidelinesPage() {
+  const router = useRouter();
+  
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-blue-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -156,21 +162,21 @@ export default function CommunityGuidelinesPage() {
             <h2 className="text-2xl font-bold text-gray-800 mb-6">Consequences for Violations</h2>
             <div className="space-y-4 text-gray-600">
               <div className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-yellow-100 text-yellow-700 rounded-full flex items-center justify-center text-sm font-bold">1</span>
+                <span className="shrink-0 w-6 h-6 bg-yellow-100 text-yellow-700 rounded-full flex items-center justify-center text-sm font-bold">1</span>
                 <div>
                   <h4 className="font-semibold text-gray-800">First Warning</h4>
                   <p>Educational message about community guidelines with content removal if necessary.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-orange-100 text-orange-700 rounded-full flex items-center justify-center text-sm font-bold">2</span>
+                <span className="shrink-0 w-6 h-6 bg-orange-100 text-orange-700 rounded-full flex items-center justify-center text-sm font-bold">2</span>
                 <div>
                   <h4 className="font-semibold text-gray-800">Temporary Suspension</h4>
                   <p>24-48 hour suspension from community features with mandatory guideline review.</p>
                 </div>
               </div>
               <div className="flex items-start gap-3">
-                <span className="flex-shrink-0 w-6 h-6 bg-red-100 text-red-700 rounded-full flex items-center justify-center text-sm font-bold">3</span>
+                <span className="shrink-0 w-6 h-6 bg-red-100 text-red-700 rounded-full flex items-center justify-center text-sm font-bold">3</span>
                 <div>
                   <h4 className="font-semibold text-gray-800">Permanent Ban</h4>
                   <p>Complete removal from community features for repeated or severe violations.</p>
@@ -206,7 +212,7 @@ export default function CommunityGuidelinesPage() {
           </section>
 
           {/* Contact */}
-          <section className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl p-8 text-center">
+          <section className="bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-xl p-8 text-center">
             <h2 className="text-2xl font-bold mb-4">Questions About Our Guidelines?</h2>
             <p className="text-lg mb-6">
               We're here to help clarify any questions you may have about our community standards.
@@ -230,12 +236,12 @@ export default function CommunityGuidelinesPage() {
 
         {/* Navigation */}
         <div className="text-center mt-12">
-          <a
-            href="/"
+          <button
+            onClick={() => router.push('/mood-feed')}
             className="inline-flex items-center text-purple-600 hover:text-purple-800 font-medium"
           >
             ← Back to Home
-          </a>
+          </button>
         </div>
       </div>
     </div>

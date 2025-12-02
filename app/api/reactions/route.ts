@@ -1,5 +1,63 @@
 import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '../../../lib/supabaseClient';
+import fs from 'fs';
+import path from 'path';
+
+// Mock database using JSON file for development
+const DB_PATH = path.join(process.cwd(), 'data', 'reactions.json');
+
+function ensureDataDir() {
+  const dataDir = path.dirname(DB_PATH);
+  if (!fs.existsSync(dataDir)) {
+    fs.mkdirSync(dataDir, { recursive: true });
+  }
+}
+
+function readReactions() {
+  ensureDataDir();
+  if (!fs.existsSync(DB_PATH)) {
+    return [];
+  }
+  try {
+    const data = fs.readFileSync(DB_PATH, 'utf-8');
+    return JSON.parse(data);
+  } catch {
+    return [];
+  }
+}
+
+function writeReactions(reactions: any[]) {
+  ensureDataDir();
+  fs.writeFileSync(DB_PATH, JSON.stringify(reactions, null, 2));
+}
+
+export async function GET(req: Request) {
+  try {
+    const url = new URL(req.url);
+    const postId = url.searchParams.get('post_id');
+    
+    if (!postId) {
+      return NextResponse.json({ error: 'Missing post_id' }, { status: 400 });
+    }
+
+    const allReactions = readReactions();
+    const postReactions = allReactions.filter((reaction: any) => reaction.post_id === postId);
+    
+    // Group by reaction type and count
+    const reactionSummary = postReactions.reduce((acc: any, reaction: any) => {
+      if (!acc[reaction.reaction_type]) {
+        acc[reaction.reaction_type] = { count: 0, users: [] };
+      }
+      acc[reaction.reaction_type].count++;
+      acc[reaction.reaction_type].users.push(reaction.user_email?.split('@')[0] || 'Anonymous');
+      return acc;
+    }, {});
+
+    return NextResponse.json({ reactions: reactionSummary });
+  } catch (err: any) {
+    console.error('Reactions GET error:', err);
+    return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
+  }
+}
 
 export async function POST(req: Request) {
   try {
@@ -14,97 +72,37 @@ export async function POST(req: Request) {
     if (!validReactions.includes(reaction_type)) {
       return NextResponse.json({ error: 'Invalid reaction type' }, { status: 400 });
     }
-    
-    const supabase = createServerSupabaseClient();
-    
-    // Get user profile
-    const { data: profile } = await supabase
-      .from('profiles')
-      .select('id')
-      .eq('email', user_email)
-      .single();
-    
-    if (!profile) {
-      return NextResponse.json({ error: 'User not found' }, { status: 404 });
-    }
+
+    const allReactions = readReactions();
     
     // Check if reaction already exists
-    const { data: existingReaction } = await supabase
-      .from('post_reactions')
-      .select('id')
-      .eq('post_id', post_id)
-      .eq('user_id', profile.id)
-      .eq('reaction_type', reaction_type)
-      .single();
-    
-    if (existingReaction) {
+    const existingIndex = allReactions.findIndex((reaction: any) => 
+      reaction.post_id === post_id && 
+      reaction.user_email === user_email && 
+      reaction.reaction_type === reaction_type
+    );
+
+    if (existingIndex !== -1) {
       // Remove reaction if it exists (toggle)
-      const { error: deleteError } = await supabase
-        .from('post_reactions')
-        .delete()
-        .eq('id', existingReaction.id);
-      
-      if (deleteError) {
-        return NextResponse.json({ error: 'Failed to remove reaction' }, { status: 500 });
-      }
-      
-      return NextResponse.json({ action: 'removed' });
+      allReactions.splice(existingIndex, 1);
+      writeReactions(allReactions);
+      return NextResponse.json({ success: true, action: 'removed' });
     } else {
       // Add new reaction
-      const { data: newReaction, error } = await supabase
-        .from('post_reactions')
-        .insert({
-          post_id,
-          user_id: profile.id,
-          reaction_type
-        })
-        .select()
-        .single();
+      const newReaction = {
+        id: Date.now().toString(),
+        post_id: post_id,
+        user_email: user_email,
+        reaction_type: reaction_type,
+        created_at: new Date().toISOString()
+      };
       
-      if (error) {
-        return NextResponse.json({ error: 'Failed to add reaction' }, { status: 500 });
-      }
-      
-      return NextResponse.json({ action: 'added', reaction: newReaction });
+      allReactions.push(newReaction);
+      writeReactions(allReactions);
+      return NextResponse.json({ success: true, action: 'added', reaction: newReaction });
     }
   } catch (err: any) {
-    return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
-  }
-}
-
-export async function GET(req: Request) {
-  try {
-    const url = new URL(req.url);
-    const post_id = url.searchParams.get('post_id');
-    
-    if (!post_id) {
-      return NextResponse.json({ error: 'Post ID required' }, { status: 400 });
-    }
-    
-    const supabase = createServerSupabaseClient();
-    
-    // Get reaction counts for the post
-    const { data: reactions, error } = await supabase
-      .from('post_reactions')
-      .select('reaction_type, user_id, profiles!post_reactions_user_id_fkey(full_name)')
-      .eq('post_id', post_id);
-    
-    if (error) {
-      return NextResponse.json({ error: 'Failed to fetch reactions' }, { status: 500 });
-    }
-    
-    // Group reactions by type and count them
-    const reactionCounts = reactions.reduce((acc: any, reaction: any) => {
-      if (!acc[reaction.reaction_type]) {
-        acc[reaction.reaction_type] = { count: 0, users: [] };
-      }
-      acc[reaction.reaction_type].count++;
-      acc[reaction.reaction_type].users.push(reaction.profiles?.full_name || 'Anonymous');
-      return acc;
-    }, {});
-    
-    return NextResponse.json({ reactions: reactionCounts });
-  } catch (err: any) {
+    console.error('Reactions POST error:', err);
     return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
   }
 }

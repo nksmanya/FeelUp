@@ -1,19 +1,25 @@
 import ClientAuthCard from '../../components/ClientAuthCard';
 
+'use client';
+
+import { useRouter } from 'next/navigation';
+
 export default function LoginPage() {
+  const router = useRouter();
+  
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-blue-50">
       <div className="container mx-auto px-4 py-8">
         {/* Navigation */}
         <nav className="mb-8">
           <div className="flex items-center justify-between">
             <h1 className="text-2xl font-bold text-purple-800">FeelUp</h1>
-            <a
-              href="/"
+            <button
+              onClick={() => router.push('/mood-feed')}
               className="text-purple-600 hover:text-purple-800 transition-colors"
             >
               ← Back to Home
-            </a>
+            </button>
           </div>
         </nav>
 

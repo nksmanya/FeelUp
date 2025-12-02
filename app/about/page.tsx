@@ -1,6 +1,12 @@
+'use client';
+
+import { useRouter } from 'next/navigation';
+
 export default function AboutPage() {
+  const router = useRouter();
+  
   return (
-    <div className="min-h-screen bg-gradient-to-br from-purple-50 via-pink-50 to-blue-50">
+    <div className="min-h-screen bg-linear-to-br from-purple-50 via-pink-50 to-blue-50">
       <div className="container mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
@@ -92,7 +98,7 @@ export default function AboutPage() {
           </section>
 
           {/* Contact */}
-          <section className="bg-gradient-to-r from-purple-600 to-pink-600 text-white rounded-xl p-8">
+          <section className="bg-linear-to-r from-purple-600 to-pink-600 text-white rounded-xl p-8">
             <div className="text-center">
               <h2 className="text-2xl font-bold mb-4">Get In Touch</h2>
               <p className="text-lg mb-6">
@@ -118,12 +124,12 @@ export default function AboutPage() {
 
         {/* Navigation */}
         <div className="text-center mt-12">
-          <a
-            href="/"
+          <button
+            onClick={() => router.push('/mood-feed')}
             className="inline-flex items-center text-purple-600 hover:text-purple-800 font-medium"
           >
             ← Back to Home
-          </a>
+          </button>
         </div>
       </div>
     </div>
