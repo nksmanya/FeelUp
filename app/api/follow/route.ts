@@ -13,7 +13,7 @@ async function ensureDataDirectory() {
   }
 }
 
-// Read follows from file
+// Read follows from fileKO
 async function readFollows() {
   try {
     await ensureDataDirectory();
