@@ -9,8 +9,8 @@ export default function Logo({ size = 36, src = "/favicon.png" }: LogoProps) {
   const imgSize = Math.max(24, size);
   return (
     <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
-      <div className="logo-img" style={{ width: imgSize, height: imgSize }}>
-        <Image src={src} alt="FeelUp logo" width={imgSize} height={imgSize} />
+      <div className="avatar" style={{ width: imgSize, height: imgSize }}>
+        <span style={{ color: 'var(--brand-blue)', fontWeight: 700, fontSize: Math.round(imgSize/2) }}>{'F'}</span>
       </div>
       <span className="logo-text">FeelUp</span>
     </div>

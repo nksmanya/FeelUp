@@ -47,17 +47,17 @@ export default function HeroStack({ width = 360, height = 420 }: { width?: numbe
       onMouseEnter={() => stop()}
       onMouseLeave={() => start()}
     >
-      <div style={{ width, height }} className="relative mx-auto">
+      <div style={{ width, height }} className="relative mx-auto surface-card" >
         {ordered.map((src, i) => {
           const p = positions[i];
-          const style: React.CSSProperties = {
+            const style: React.CSSProperties = {
             position: "absolute",
             left: p.left,
             top: p.top,
             width,
             height,
             borderRadius: 16,
-            boxShadow: "0 12px 30px rgba(2,6,23,0.12)",
+            boxShadow: getComputedStyle(document.documentElement).getPropertyValue('--shadow-soft') || '0 12px 30px rgba(2,6,23,0.12)',
             transform: `translateZ(0) rotate(${p.rotate}deg) scale(${p.scale})`,
             transition: "transform 420ms cubic-bezier(.2,.9,.2,1), left 420ms, top 420ms, opacity 420ms",
             zIndex: p.z,

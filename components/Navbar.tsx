@@ -27,46 +27,48 @@ export default function Navbar() {
   };
 
   return (
-    <nav className="bg-white border-b border-gray-200 sticky top-0 z-50">
+    <nav className="backdrop-blur-sm bg-white/60 border-b border-transparent sticky top-0 z-50">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between items-center h-16">
           
           {/* Logo & Brand */}
           <div className="flex items-center">
-            <Link href="/mood-feed" className="flex items-center space-x-2">
-              <div className="w-10 h-10 bg-gradient-to-br from-blue-500 to-purple-600 rounded-xl flex items-center justify-center">
-                <span className="text-white font-bold text-lg">F</span>
+            <Link href="/mood-feed" className="flex items-center space-x-3">
+              <div className="logo-img" style={{['--logo-size' as any]: '44px'}}>
+                <div className="w-full h-full flex items-center justify-center">
+                  <span className="text-white font-bold text-lg">F</span>
+                </div>
               </div>
               <div>
-                <div className="text-xl font-bold text-gray-900">
-                  Feel<span className="text-purple-600">Up</span>
+                <div className="text-xl font-bold text-[var(--brand-black)]">
+                  Feel<span className="text-[var(--brand-blue)]">Up</span>
                 </div>
-                <div className="text-xs text-gray-500 hidden sm:block">Positive Vibes Only</div>
+                <div className="text-xs text-[var(--feelup-muted)] hidden sm:block">Positive Vibes Only</div>
               </div>
             </Link>
           </div>
 
           {/* Navigation Links */}
-          <div className="hidden md:flex space-x-1">
+          <div className="hidden md:flex space-x-3 items-center">
             {navigation.map((item) => (
               <Link
                 key={item.name}
                 href={item.href}
-                className={`group relative px-3 py-2 rounded-lg text-sm font-medium transition-colors ${
+                className={`group relative px-3 py-2 rounded-full text-sm font-medium transition-colors ${
                   pathname === item.href
-                    ? 'bg-purple-100 text-purple-700'
-                    : 'text-gray-600 hover:bg-gray-100 hover:text-gray-900'
+                    ? 'bg-[rgba(37,150,190,0.09)] text-[var(--brand-blue)]'
+                    : 'text-[var(--text-muted)] hover:bg-[rgba(37,150,190,0.03)] hover:text-[var(--brand-blue)]'
                 }`}
               >
                 <div className="flex items-center space-x-2">
                   <span>{item.icon}</span>
                   <span className="hidden lg:inline">{item.name}</span>
                 </div>
-                
+
                 {/* Tooltip for mobile */}
-                <div className="lg:hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-gray-900 text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
+                <div className="lg:hidden absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-2 py-1 bg-[var(--brand-black)] text-white text-xs rounded opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap">
                   {item.name}
-                  <div className="text-xs text-gray-400">{item.description}</div>
+                  <div className="text-xs text-[rgba(255,255,255,0.8)]">{item.description}</div>
                 </div>
               </Link>
             ))}
@@ -78,9 +80,9 @@ export default function Navbar() {
               <div>
                 <button
                   onClick={() => setShowProfileMenu(!showProfileMenu)}
-                  className="flex items-center space-x-2 p-2 rounded-lg hover:bg-gray-100 transition-colors"
+                  className="flex items-center space-x-3 p-2 rounded-full hover:bg-[rgba(37,150,190,0.04)] transition-colors"
                 >
-                  <div className="w-8 h-8 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold text-sm">
+                    <div className="w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-sm" style={{background: 'linear-gradient(90deg,#e6f7ff,#fff0f6)', color: 'var(--brand-blue)'}}>
                     {session.user.name?.[0] || session.user.email?.[0] || '?'}
                   </div>
                   <div className="hidden sm:block text-left">
@@ -98,7 +100,7 @@ export default function Navbar() {
 
                 {/* Profile Dropdown */}
                 {showProfileMenu && (
-                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-gray-200 py-1 z-50">
+                  <div className="absolute right-0 mt-2 w-56 bg-white rounded-lg shadow-lg border border-transparent py-1 z-50 surface-card">
                     <div className="px-4 py-3 border-b border-gray-100">
                       <div className="flex items-center space-x-3">
                         <div className="w-10 h-10 bg-gradient-to-br from-green-400 to-blue-500 rounded-full flex items-center justify-center text-white font-semibold">
@@ -111,15 +113,15 @@ export default function Navbar() {
                       </div>
                     </div>
                     
-                    <Link href="/profile" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <Link href="/profile" className="flex items-center px-4 py-2 text-sm text-[var(--text-muted)] hover:bg-[rgba(15,23,42,0.03)]">
                       <span className="mr-3">👤</span>
                       View Profile
                     </Link>
-                    <Link href="/settings" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <Link href="/settings" className="flex items-center px-4 py-2 text-sm text-[var(--text-muted)] hover:bg-[rgba(15,23,42,0.03)]">
                       <span className="mr-3">⚙️</span>
                       Settings
                     </Link>
-                    <Link href="/achievements" className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100">
+                    <Link href="/achievements" className="flex items-center px-4 py-2 text-sm text-[var(--text-muted)] hover:bg-[rgba(15,23,42,0.03)]">
                       <span className="mr-3">🏆</span>
                       Achievements
                     </Link>
@@ -137,7 +139,7 @@ export default function Navbar() {
             ) : (
               <Link
                 href="/"
-                className="bg-purple-600 text-white px-4 py-2 rounded-lg text-sm font-medium hover:bg-purple-700 transition-colors"
+                className="bg-[var(--brand-blue)] text-white px-4 py-2 rounded-full text-sm font-medium hover:brightness-95 transition-colors"
               >
                 Sign In
               </Link>

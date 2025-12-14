@@ -101,19 +101,19 @@ export default function StreakDisplay({ userEmail, streakType, size = 'medium' }
 
   return (
     <div className={`flex items-center ${getSizeClasses()}`}>
-      <span className="text-lg">{getFireEmoji(currentCount)}</span>
-      <div className="flex flex-col">
-        <div className={`${getNumberSize()} text-gray-900`}>
+      <span className="text-lg mr-2">{getFireEmoji(currentCount)}</span>
+      <div className="flex items-center gap-3">
+        <div className={`px-3 py-1 bg-[rgba(37,150,190,0.08)] rounded-full ${getNumberSize()} text-[var(--brand-blue)]`}>
           {currentCount} day{currentCount !== 1 ? 's' : ''}
         </div>
         {bestCount > currentCount && size !== 'small' && (
-          <div className="text-xs text-gray-500">
+          <div className="text-xs text-[var(--text-muted)]">
             Best: {bestCount}
           </div>
         )}
       </div>
       {size === 'large' && (
-        <div className="text-xs text-gray-600 ml-2">
+        <div className="text-xs text-[var(--text-muted)] ml-3">
           {streakType} streak
         </div>
       )}

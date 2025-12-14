@@ -61,17 +61,17 @@ export default function AuthCard() {
   }
 
   return (
-    <div className="mx-auto w-full rounded-[var(--radius-md)] bg-white p-6 soft-glow">
+    <div className="mx-auto w-full max-w-md rounded-[var(--radius-md)] bg-white p-6 soft-glow surface-card">
       <div className="mb-4 flex items-center justify-center">
         <Logo size={56} />
       </div>
 
       <h2 className="mb-2 text-center text-2xl font-semibold">FeelUp</h2>
       <p className="mb-4 text-center text-sm text-[var(--feelup-muted)]">
-        A calm space for emotional sharing. Sign in or create an account to continue.
+        A gentle, private place to reflect and connect — join the community to start sharing.
       </p>
 
-      <nav className="mb-4 flex gap-2" role="tablist" aria-label="Sign in or sign up">
+      <nav className="mb-4 flex gap-2 bg-[rgba(37,150,190,0.02)] p-1 rounded-md" role="tablist" aria-label="Sign in or sign up">
         <button
           onClick={() => setMode("signin")}
           aria-selected={mode === "signin"}
