@@ -232,43 +232,36 @@ export default function GoalsPage() {
           <p className="text-gray-600">Set and track your daily micro-goals for consistent progress.</p>
         </div>
 
-        {/* Stats and Streak Display */}
-        <div className="grid md:grid-cols-3 gap-4 mb-8">
-          <div className="bg-white p-6 rounded-xl shadow-sm">
-            <div className="text-2xl font-bold text-green-600">{completionRate}%</div>
-            <div className="text-sm text-gray-600">completion rate</div>
-            <div className="text-xs text-gray-500 mt-1">
-              {completedGoals.length}/{goals.length} goals completed
+        {/* Top stats cards */}
+        <div className="mb-8">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
+              <div className="text-3xl">🔥</div>
+              <div className="mt-2">
+                <StreakDisplay userEmail={user?.email || ''} streakType="goals" size="small" />
+              </div>
+              <div className="text-xs text-gray-500 mt-1">Day Streak</div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
+              <div className="text-3xl">✅</div>
+              <div className="text-3xl font-bold mt-2">{completedGoals.length}/{goals.length || 1}</div>
+              <div className="text-xs text-gray-500 mt-1">Today's Progress</div>
+            </div>
+
+            <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
+              <div className="text-3xl">🏆</div>
+              <div className="text-3xl font-bold mt-2">{completionRate}%</div>
+              <div className="text-xs text-gray-500 mt-1">Completion Rate</div>
             </div>
           </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-sm">
-            <StreakDisplay 
-              userEmail={user?.email || ''} 
-              streakType="goals" 
-              size="large" 
-            />
-          </div>
-          
-          <div className="bg-white p-6 rounded-xl shadow-sm">
-            <div className="text-2xl font-bold text-blue-600">{goals.length}</div>
-            <div className="text-sm text-gray-600">goals today</div>
-            <div className="text-xs text-gray-500 mt-1">
-              {pendingGoals.length} remaining
-            </div>
+
+          <div className="mt-6 bg-white rounded-full h-3 overflow-hidden">
+            <div className="h-full bg-emerald-400" style={{ width: `${completionRate}%` }} />
           </div>
         </div>
 
-        <div className="flex items-center justify-between mb-6">
-          <div>
-            <h1 className="text-2xl font-semibold mb-2">Daily Goals 🎯</h1>
-            <p className="text-[var(--feelup-muted)]">Set and track your daily micro-goals</p>
-          </div>
-          <div className="text-right">
-            <div className="text-2xl font-bold text-green-600">{completionRate}%</div>
-            <div className="text-sm text-[var(--feelup-muted)]">completion rate</div>
-          </div>
-        </div>
+        {/* heading area (kept above) */}
 
         {/* Date Selector */}
         <div className="mb-6">
@@ -284,14 +277,16 @@ export default function GoalsPage() {
         {/* Add Goal Section */}
         <div className="mb-8">
           {!showAddGoal ? (
-            <button
-              onClick={() => setShowAddGoal(true)}
-              className="btn-primary rounded-xl px-6 py-3"
-            >
-              + Add New Goal
-            </button>
+            <div className="flex justify-center">
+              <button
+                onClick={() => setShowAddGoal(true)}
+                className="px-6 py-3 rounded-full bg-white border border-gray-200 shadow-sm text-gray-700 hover:bg-gray-50"
+              >
+                + Add Custom Goal
+              </button>
+            </div>
           ) : (
-            <div className="bg-white rounded-xl p-6 soft-glow">
+            <div className="bg-white rounded-2xl p-6 soft-glow">
               <form onSubmit={addGoal} className="grid gap-4">
                 <input
                   type="text"
@@ -342,26 +337,26 @@ export default function GoalsPage() {
                 {pendingGoals.map(goal => {
                   const category = goalCategories.find(c => c.value === goal.category);
                   return (
-                    <div key={goal.id} className="bg-white rounded-xl p-4 soft-glow border-l-4 border-orange-400">
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="flex items-center gap-2 mb-1">
-                            <span className="text-sm px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-                              {category?.label || goal.category}
-                            </span>
-                          </div>
+                    <div key={goal.id} className="bg-white rounded-2xl p-4 soft-glow flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-2xl">
+                          {category?.label?.split(' ')[0] || '•'}
+                        </div>
+                        <div>
                           <h3 className="font-medium text-gray-900">{goal.title}</h3>
                           {goal.description && (
                             <p className="text-sm text-gray-600 mt-1">{goal.description}</p>
                           )}
                         </div>
-                        <button
-                          onClick={() => setCompletingGoal(goal)}
-                          className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-lg text-sm transition-colors"
-                        >
-                          Complete ✓
-                        </button>
                       </div>
+
+                      <button
+                        onClick={() => setCompletingGoal(goal)}
+                        aria-label={`Complete ${goal.title}`}
+                        className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-emerald-50"
+                      >
+                        ○
+                      </button>
                     </div>
                   );
                 })}
@@ -380,28 +375,24 @@ export default function GoalsPage() {
                   const category = goalCategories.find(c => c.value === goal.category);
                   const completionMood = completionMoods.find(m => m.value === goal.mood_at_completion);
                   return (
-                    <div key={goal.id} className="bg-white rounded-xl p-4 soft-glow border-l-4 border-green-500">
-                      <div className="flex items-center gap-2 mb-1">
-                        <span className="text-sm px-2 py-1 rounded-full bg-gray-100 text-gray-700">
-                          {category?.label || goal.category}
-                        </span>
-                        {completionMood && (
-                          <span className="text-sm px-2 py-1 rounded-full bg-green-100 text-green-700">
-                            {completionMood.emoji} {completionMood.label}
-                          </span>
-                        )}
-                      </div>
-                      <h3 className="font-medium text-gray-900">{goal.title}</h3>
-                      {goal.description && (
-                        <p className="text-sm text-gray-600 mt-1">{goal.description}</p>
-                      )}
-                      {goal.reflection_note && (
-                        <div className="mt-2 p-2 bg-green-50 rounded-lg">
-                          <div className="text-xs text-green-700 font-medium mb-1">Reflection:</div>
-                          <p className="text-sm text-green-800">{goal.reflection_note}</p>
+                    <div key={goal.id} className="bg-white rounded-2xl p-4 soft-glow flex items-center justify-between">
+                      <div className="flex items-center gap-4">
+                        <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-2xl text-emerald-700">✓</div>
+                        <div>
+                          <h3 className="font-medium text-gray-900 line-through text-gray-500">{goal.title}</h3>
+                          {goal.description && (
+                            <p className="text-sm text-gray-600 mt-1">{goal.description}</p>
+                          )}
+                          {goal.reflection_note && (
+                            <div className="mt-2 p-2 bg-green-50 rounded-lg">
+                              <div className="text-xs text-green-700 font-medium mb-1">Reflection:</div>
+                              <p className="text-sm text-green-800">{goal.reflection_note}</p>
+                            </div>
+                          )}
                         </div>
-                      )}
-                      <div className="text-xs text-gray-500 mt-2">
+                      </div>
+
+                      <div className="text-xs text-gray-500">
                         Completed: {new Date(goal.completed_at).toLocaleString()}
                       </div>
                     </div>
