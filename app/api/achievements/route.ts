@@ -43,7 +43,7 @@ export async function POST(req: Request) {
     }
 
     const supabase = createServerSupabaseClient();
-    const newAchievements = [];
+    const newAchievements: any[] = [];
 
     // Check different achievement types
     if (badge_type === 'goals') {
@@ -65,7 +65,7 @@ export async function POST(req: Request) {
 
 async function checkGoalAchievements(supabase: any, userEmail: string, data: any) {
   const { totalCompleted, completedToday } = data;
-  const achievements = [];
+  const achievements: any[] = [];
 
   const goalMilestones = [
     { count: 1, name: 'First Steps', emoji: '👟', description: 'Completed your first goal!' },
@@ -116,7 +116,7 @@ async function checkGoalAchievements(supabase: any, userEmail: string, data: any
 
 async function checkSocialAchievements(supabase: any, userEmail: string, data: any) {
   const { postsCount, reactionsGiven } = data;
-  const achievements = [];
+  const achievements: any[] = [];
 
   const socialMilestones = [
     { count: 1, name: 'First Share', emoji: '💭', description: 'Shared your first mood post' },
@@ -150,7 +150,7 @@ async function checkSocialAchievements(supabase: any, userEmail: string, data: a
 
 async function checkWellnessAchievements(supabase: any, userEmail: string, data: any) {
   const { journalEntries, gratitudeNotes } = data;
-  const achievements = [];
+  const achievements: any[] = [];
 
   if (journalEntries >= 7) {
     await supabase

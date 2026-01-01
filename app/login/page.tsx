@@ -1,7 +1,6 @@
+ 'use client';
+
 import ClientAuthCard from '../../components/ClientAuthCard';
-
-'use client';
-
 import { useRouter } from 'next/navigation';
 
 export default function LoginPage() {

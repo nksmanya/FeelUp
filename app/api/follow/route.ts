@@ -51,7 +51,7 @@ export async function GET(request: Request) {
     }
 
     const follows = await readFollows();
-    let result = [];
+    let result: any = [];
 
     if (type === 'followers') {
       // Get users who follow this user
