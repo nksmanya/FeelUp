@@ -222,18 +222,32 @@ export default function MoodFeedPage() {
         }
       }
 
-      // Only redirect if we're certain there's no valid session
-      if (nextSessionStatus === "unauthenticated") {
+      // Only redirect if we're certain there's no valid session. Avoid
+      // redirecting while an OAuth callback is in progress (e.g. `?code=`),
+      // which can cause a loop between `/` and `/mood-feed`.
+      const search = typeof window !== "undefined" ? window.location.search : "";
+      const params = new URLSearchParams(search);
+      const isOAuthCallback = params.has("code") || params.has("state") || params.has("oauth_token");
+
+      if (nextSessionStatus === "unauthenticated" && !isOAuthCallback) {
         setLoading(false);
         router.replace("/");
       } else {
-        // Still loading NextAuth, wait a bit more
+        // Either NextAuth is still resolving or we're in an OAuth callback —
+        // keep the loading state until session settles to prevent flashing the feed.
         setLoading(false);
       }
     };
 
-    // Only run auth check if NextAuth has finished loading and we don't have a user
-    if (nextSessionStatus !== "loading" && !user) {
+    // If NextAuth is still loading, keep showing the loading state to avoid
+    // rendering the feed briefly before auth is resolved (prevents flicker).
+    if (nextSessionStatus === "loading") {
+      setLoading(true);
+      return;
+    }
+
+    // Only run auth check once NextAuth has finished loading and we don't have a user
+    if (!user) {
       checkAuth();
     }
   }, [nextSession, nextSessionStatus, router, user]);

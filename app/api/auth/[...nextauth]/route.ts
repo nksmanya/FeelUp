@@ -54,10 +54,16 @@ const handler = NextAuth({
   },
   callbacks: {
     async redirect({ url, baseUrl }) {
-      // Allows relative callback URLs
-      if (url.startsWith("/")) return `${baseUrl}${url}`;
-      // Allows callback URLs on the same origin
-      else if (new URL(url).origin === baseUrl) return url;
+      try {
+        // If a relative path, resolve against baseUrl
+        if (url.startsWith("/")) return new URL(url, baseUrl).toString();
+
+        // If absolute and same origin, allow it
+        const dest = new URL(url);
+        if (dest.origin === baseUrl) return url;
+      } catch (e) {
+        // ignore and fallthrough to default
+      }
       return `${baseUrl}/mood-feed`;
     },
     async session({ session, token }) {

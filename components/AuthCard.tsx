@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import Logo from "./Logo";
 import { createBrowserSupabaseClient } from "../lib/supabaseClient";
@@ -10,6 +11,7 @@ const supabase =
   typeof window !== "undefined" ? createBrowserSupabaseClient() : null;
 
 export default function AuthCard() {
+  const router = useRouter();
   const [mode, setMode] = useState<"signin" | "signup">("signin");
   const [email, setEmail] = useState("");
   const [name, setName] = useState("");
@@ -41,7 +43,7 @@ export default function AuthCard() {
         // If signUp requires confirmation, the user may need to confirm via email.
         // If immediate session exists, redirect; otherwise show a message.
         if (data?.user) {
-          window.location.href = "/mood-feed";
+          router.replace("/mood-feed");
         } else {
           alert(
             "Registration successful. Please check your email to confirm your account.",
@@ -59,7 +61,7 @@ export default function AuthCard() {
       });
       setLoading(false);
       if (error) return alert(error.message || "Sign in failed");
-      if (data?.session) window.location.href = "/mood-feed";
+      if (data?.session) router.replace("/mood-feed");
     } catch (err: any) {
       setLoading(false);
       alert(err?.message || "An error occurred");
@@ -196,7 +198,7 @@ export default function AuthCard() {
 
           <div className="grid grid-cols-2 gap-3">
             <button
-              onClick={() => signIn("google", { callbackUrl: "/mood-feed" })}
+              onClick={() => signIn("google", { callbackUrl: `${window.location.origin}/mood-feed` })}
               className="rounded-xl px-3 py-2 text-sm btn-secondary"
               aria-label="Sign in with Google"
             >
@@ -204,7 +206,7 @@ export default function AuthCard() {
             </button>
 
             <button
-              onClick={() => signIn("github", { callbackUrl: "/mood-feed" })}
+              onClick={() => signIn("github", { callbackUrl: `${window.location.origin}/mood-feed` })}
               className="rounded-xl px-3 py-2 text-sm btn-secondary"
               aria-label="Sign in with GitHub"
             >
