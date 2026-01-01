@@ -1,10 +1,10 @@
-import { NextResponse } from 'next/server';
-import { createServerSupabaseClient } from '../../../lib/supabaseClient';
+import { NextResponse } from "next/server";
+import { createServerSupabaseClient } from "../../../lib/supabaseClient";
 
 export async function POST() {
   try {
     const supabase = createServerSupabaseClient();
-    
+
     // Create tables one by one to avoid issues
     const queries = [
       // Enhanced profiles table
@@ -22,7 +22,7 @@ export async function POST() {
         created_at TIMESTAMPTZ DEFAULT now(),
         updated_at TIMESTAMPTZ DEFAULT now()
       );`,
-      
+
       // Enhanced mood posts
       `CREATE TABLE IF NOT EXISTS public.mood_posts (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -37,7 +37,7 @@ export async function POST() {
         anonymous BOOLEAN DEFAULT false,
         created_at TIMESTAMPTZ DEFAULT now()
       );`,
-      
+
       // Post reactions
       `CREATE TABLE IF NOT EXISTS public.post_reactions (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -46,7 +46,7 @@ export async function POST() {
         reaction_type TEXT NOT NULL,
         created_at TIMESTAMPTZ DEFAULT now()
       );`,
-      
+
       // Daily goals
       `CREATE TABLE IF NOT EXISTS public.daily_goals (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -62,7 +62,7 @@ export async function POST() {
         streak_day INTEGER DEFAULT 1,
         created_at TIMESTAMPTZ DEFAULT now()
       );`,
-      
+
       // Journal entries
       `CREATE TABLE IF NOT EXISTS public.journal_entries (
         id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
@@ -76,21 +76,27 @@ export async function POST() {
         converted_to_post_id UUID,
         created_at TIMESTAMPTZ DEFAULT now(),
         updated_at TIMESTAMPTZ DEFAULT now()
-      );`
+      );`,
     ];
-    
+
     // Execute each query
     for (const query of queries) {
-      const { error } = await supabase.rpc('exec_sql', { sql: query });
+      const { error } = await supabase.rpc("exec_sql", { sql: query });
       if (error) {
-        console.error('Query error:', error, 'for query:', query);
+        console.error("Query error:", error, "for query:", query);
         // Continue with other queries even if one fails
       }
     }
-    
-    return NextResponse.json({ success: true, message: 'Database setup completed' });
+
+    return NextResponse.json({
+      success: true,
+      message: "Database setup completed",
+    });
   } catch (err: any) {
-    console.error('Setup error:', err);
-    return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
+    console.error("Setup error:", err);
+    return NextResponse.json(
+      { error: err?.message || String(err) },
+      { status: 500 },
+    );
   }
 }

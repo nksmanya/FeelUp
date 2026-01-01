@@ -1,9 +1,9 @@
-import { NextResponse } from 'next/server';
-import fs from 'fs';
-import path from 'path';
+import { NextResponse } from "next/server";
+import fs from "fs";
+import path from "path";
 
 // Mock database using JSON file for development
-const DB_PATH = path.join(process.cwd(), 'data', 'journal_entries.json');
+const DB_PATH = path.join(process.cwd(), "data", "journal_entries.json");
 
 function ensureDataDir() {
   const dataDir = path.dirname(DB_PATH);
@@ -18,7 +18,7 @@ function readEntries() {
     return [];
   }
   try {
-    const data = fs.readFileSync(DB_PATH, 'utf-8');
+    const data = fs.readFileSync(DB_PATH, "utf-8");
     return JSON.parse(data);
   } catch {
     return [];
@@ -33,40 +33,66 @@ function writeEntries(entries: any[]) {
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
-    const user_email = url.searchParams.get('user_email');
-    const limit = parseInt(url.searchParams.get('limit') || '20');
-    const is_gratitude = url.searchParams.get('is_gratitude') === 'true';
-    
+    const user_email = url.searchParams.get("user_email");
+    const limit = parseInt(url.searchParams.get("limit") || "20");
+    const is_gratitude = url.searchParams.get("is_gratitude") === "true";
+
     if (!user_email) {
-      return NextResponse.json({ error: 'User email required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "User email required" },
+        { status: 400 },
+      );
     }
-    
+
     const allEntries = readEntries();
-    let userEntries = allEntries.filter((entry: any) => entry.user_email === user_email);
-    
+    let userEntries = allEntries.filter(
+      (entry: any) => entry.user_email === user_email,
+    );
+
     if (is_gratitude) {
-      userEntries = userEntries.filter((entry: any) => entry.is_gratitude === true);
+      userEntries = userEntries.filter(
+        (entry: any) => entry.is_gratitude === true,
+      );
     }
-    
+
     // Sort by created_at descending and limit
-    userEntries.sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
+    userEntries.sort(
+      (a: any, b: any) =>
+        new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
+    );
     userEntries = userEntries.slice(0, limit);
-    
+
     return NextResponse.json({ entries: userEntries });
   } catch (err: any) {
-    console.error('Journal GET error:', err);
-    return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
+    console.error("Journal GET error:", err);
+    return NextResponse.json(
+      { error: err?.message || String(err) },
+      { status: 500 },
+    );
   }
 }
 
 export async function POST(req: Request) {
   try {
-    const { user_email, title, content, mood, mood_emoji, energy_level, tags, is_gratitude, can_convert_to_post } = await req.json();
-    
+    const {
+      user_email,
+      title,
+      content,
+      mood,
+      mood_emoji,
+      energy_level,
+      tags,
+      is_gratitude,
+      can_convert_to_post,
+    } = await req.json();
+
     if (!user_email || !content?.trim()) {
-      return NextResponse.json({ error: 'User email and content are required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "User email and content are required" },
+        { status: 400 },
+      );
     }
-    
+
     const allEntries = readEntries();
     const newEntry = {
       id: Date.now().toString(), // Simple ID generation
@@ -80,54 +106,64 @@ export async function POST(req: Request) {
       is_gratitude: !!is_gratitude,
       can_convert_to_post: !!can_convert_to_post,
       created_at: new Date().toISOString(),
-      updated_at: new Date().toISOString()
+      updated_at: new Date().toISOString(),
     };
-    
+
     allEntries.push(newEntry);
     writeEntries(allEntries);
-    
-    console.log('Journal entry created successfully:', newEntry);
+
+    console.log("Journal entry created successfully:", newEntry);
     return NextResponse.json({ entry: newEntry });
   } catch (err: any) {
-    console.error('Journal POST error:', err);
-    return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
+    console.error("Journal POST error:", err);
+    return NextResponse.json(
+      { error: err?.message || String(err) },
+      { status: 500 },
+    );
   }
 }
 
 export async function PATCH(req: Request) {
   try {
-    const { entry_id, user_email, title, content, mood, mood_emoji, tags } = await req.json();
-    
+    const { entry_id, user_email, title, content, mood, mood_emoji, tags } =
+      await req.json();
+
     if (!entry_id || !user_email) {
-      return NextResponse.json({ error: 'Entry ID and user email required' }, { status: 400 });
+      return NextResponse.json(
+        { error: "Entry ID and user email required" },
+        { status: 400 },
+      );
     }
-    
+
     const allEntries = readEntries();
-    const entryIndex = allEntries.findIndex((entry: any) => 
-      entry.id === entry_id && entry.user_email === user_email
+    const entryIndex = allEntries.findIndex(
+      (entry: any) => entry.id === entry_id && entry.user_email === user_email,
     );
-    
+
     if (entryIndex === -1) {
-      return NextResponse.json({ error: 'Entry not found' }, { status: 404 });
+      return NextResponse.json({ error: "Entry not found" }, { status: 404 });
     }
-    
+
     const entry = allEntries[entryIndex];
-    
+
     // Update fields
     if (title !== undefined) entry.title = title?.trim() || null;
     if (content !== undefined) entry.content = content.trim();
     if (mood !== undefined) entry.mood_tag = mood || null;
     if (mood_emoji !== undefined) entry.mood_emoji = mood_emoji || null;
     if (tags !== undefined) entry.tags = tags || [];
-    
+
     entry.updated_at = new Date().toISOString();
-    
+
     allEntries[entryIndex] = entry;
     writeEntries(allEntries);
-    
+
     return NextResponse.json({ entry: entry });
   } catch (err: any) {
-    console.error('Journal PATCH error:', err);
-    return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
+    console.error("Journal PATCH error:", err);
+    return NextResponse.json(
+      { error: err?.message || String(err) },
+      { status: 500 },
+    );
   }
 }

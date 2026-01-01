@@ -1,16 +1,16 @@
-'use client';
+"use client";
 
-import Link from 'next/link';
+import Link from "next/link";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
 
   const footerLinks = [
-    { name: 'About FeelUp', href: '/about' },
-    { name: 'Terms & Conditions', href: '/terms' },
-    { name: 'Privacy Policy', href: '/privacy' },
-    { name: 'Support', href: '/support' },
-    { name: 'Community Guidelines', href: '/community-guidelines' },
+    { name: "About FeelUp", href: "/about" },
+    { name: "Terms & Conditions", href: "/terms" },
+    { name: "Privacy Policy", href: "/privacy" },
+    { name: "Support", href: "/support" },
+    { name: "Community Guidelines", href: "/community-guidelines" },
   ];
 
   return (
@@ -20,7 +20,10 @@ export default function Footer() {
           {/* Brand */}
           <div className="md:col-span-1">
             <div className="flex items-center space-x-2 mb-4">
-              <div className="logo-img" style={{['--logo-size' as any]: '36px'}}>
+              <div
+                className="logo-img"
+                style={{ ["--logo-size" as any]: "36px" }}
+              >
                 <div className="w-full h-full flex items-center justify-center">
                   <span className="text-white font-bold text-sm">F</span>
                 </div>
@@ -30,7 +33,8 @@ export default function Footer() {
               </div>
             </div>
             <p className="text-sm text-[var(--feelup-muted)] mb-4">
-              Building a more positive and supportive world through wellness tracking and meaningful connections.
+              Building a more positive and supportive world through wellness
+              tracking and meaningful connections.
             </p>
             <div className="flex space-x-4">
               <span className="text-2xl">🌟</span>
@@ -41,34 +45,103 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold text-[var(--brand-black)] mb-4">Features</h3>
+            <h3 className="font-semibold text-[var(--brand-black)] mb-4">
+              Features
+            </h3>
             <ul className="space-y-2 text-sm text-[var(--feelup-muted)]">
-              <li><Link href="/mood-feed" className="hover:text-[var(--brand-blue)] transition-colors">Mood Feed</Link></li>
-              <li><Link href="/goals" className="hover:text-[var(--brand-blue)] transition-colors">Daily Goals</Link></li>
-              <li><Link href="/journal" className="hover:text-[var(--brand-blue)] transition-colors">Wellness Journal</Link></li>
-              <li><Link href="/analytics" className="hover:text-[var(--brand-blue)] transition-colors">Analytics</Link></li>
-              <li><Link href="/community" className="hover:text-[var(--brand-blue)] transition-colors">Community</Link></li>
+              <li>
+                <Link
+                  href="/mood-feed"
+                  className="hover:text-[var(--brand-blue)] transition-colors"
+                >
+                  Mood Feed
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/goals"
+                  className="hover:text-[var(--brand-blue)] transition-colors"
+                >
+                  Daily Goals
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/journal"
+                  className="hover:text-[var(--brand-blue)] transition-colors"
+                >
+                  Wellness Journal
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/analytics"
+                  className="hover:text-[var(--brand-blue)] transition-colors"
+                >
+                  Analytics
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/community"
+                  className="hover:text-[var(--brand-blue)] transition-colors"
+                >
+                  Community
+                </Link>
+              </li>
             </ul>
           </div>
 
           {/* Account */}
           <div>
-            <h3 className="font-semibold text-[var(--brand-black)] mb-4">Account</h3>
+            <h3 className="font-semibold text-[var(--brand-black)] mb-4">
+              Account
+            </h3>
             <ul className="space-y-2 text-sm text-[var(--feelup-muted)]">
-              <li><Link href="/profile" className="hover:text-[var(--brand-blue)] transition-colors">Your Profile</Link></li>
-              <li><Link href="/achievements" className="hover:text-[var(--brand-blue)] transition-colors">Achievements</Link></li>
-              <li><Link href="/settings" className="hover:text-[var(--brand-blue)] transition-colors">Settings</Link></li>
-              <li><span className="text-[rgba(107,122,137,0.6)]">Premium (Coming Soon)</span></li>
+              <li>
+                <Link
+                  href="/profile"
+                  className="hover:text-[var(--brand-blue)] transition-colors"
+                >
+                  Your Profile
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/achievements"
+                  className="hover:text-[var(--brand-blue)] transition-colors"
+                >
+                  Achievements
+                </Link>
+              </li>
+              <li>
+                <Link
+                  href="/settings"
+                  className="hover:text-[var(--brand-blue)] transition-colors"
+                >
+                  Settings
+                </Link>
+              </li>
+              <li>
+                <span className="text-[rgba(107,122,137,0.6)]">
+                  Premium (Coming Soon)
+                </span>
+              </li>
             </ul>
           </div>
 
           {/* Support & Legal */}
           <div>
-            <h3 className="font-semibold text-[var(--brand-black)] mb-4">Support & Legal</h3>
+            <h3 className="font-semibold text-[var(--brand-black)] mb-4">
+              Support & Legal
+            </h3>
             <ul className="space-y-2 text-sm text-[var(--feelup-muted)]">
               {footerLinks.map((link) => (
                 <li key={link.name}>
-                  <Link href={link.href} className="hover:text-[var(--brand-blue)] transition-colors">
+                  <Link
+                    href={link.href}
+                    className="hover:text-[var(--brand-blue)] transition-colors"
+                  >
                     {link.name}
                   </Link>
                 </li>

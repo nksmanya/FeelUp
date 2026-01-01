@@ -25,7 +25,8 @@ const handler = NextAuth({
         // Replace with your real user lookup & password check
         if (password.length >= 6) {
           // Prefer a provided name, otherwise derive a friendly name from the email local-part
-          const friendlyName = (name && name.trim()) || (email.split("@")[0] || email);
+          const friendlyName =
+            (name && name.trim()) || email.split("@")[0] || email;
           return { id: email, name: friendlyName, email };
         }
 
@@ -48,8 +49,8 @@ const handler = NextAuth({
     strategy: "jwt",
   },
   pages: {
-    signIn: '/',
-    error: '/',
+    signIn: "/",
+    error: "/",
   },
   callbacks: {
     async redirect({ url, baseUrl }) {

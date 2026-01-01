@@ -9,36 +9,49 @@ import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 
 // Enhanced mood options with emojis and colors
 const moodOptions = [
-  { label: 'Happy', emoji: '😊', color: '#fbbf24' },
-  { label: 'Calm', emoji: '😌', color: '#60a5fa' },
-  { label: 'Excited', emoji: '🤩', color: '#f472b6' },
-  { label: 'Grateful', emoji: '🙏', color: '#34d399' },
-  { label: 'Thoughtful', emoji: '🤔', color: '#a78bfa' },
-  { label: 'Curious', emoji: '🤷‍♀️', color: '#fb7185' },
-  { label: 'Peaceful', emoji: '☮️', color: '#10b981' },
-  { label: 'Hopeful', emoji: '🌟', color: '#fbbf24' },
-  { label: 'Motivated', emoji: '💪', color: '#ef4444' },
-  { label: 'Creative', emoji: '🎨', color: '#8b5cf6' },
-  { label: 'Reflective', emoji: '🌙', color: '#6366f1' },
-  { label: 'Energetic', emoji: '⚡', color: '#f59e0b' },
-  { label: 'Sad', emoji: '😔', color: '#94a3b8' },
-  { label: 'Anxious', emoji: '😰', color: '#fb7185' },
-  { label: 'Tired', emoji: '😴', color: '#6b7280' },
-  { label: 'Overwhelmed', emoji: '😵‍💫', color: '#f87171' },
+  { label: "Happy", emoji: "😊", color: "#fbbf24" },
+  { label: "Calm", emoji: "😌", color: "#60a5fa" },
+  { label: "Excited", emoji: "🤩", color: "#f472b6" },
+  { label: "Grateful", emoji: "🙏", color: "#34d399" },
+  { label: "Thoughtful", emoji: "🤔", color: "#a78bfa" },
+  { label: "Curious", emoji: "🤷‍♀️", color: "#fb7185" },
+  { label: "Peaceful", emoji: "☮️", color: "#10b981" },
+  { label: "Hopeful", emoji: "🌟", color: "#fbbf24" },
+  { label: "Motivated", emoji: "💪", color: "#ef4444" },
+  { label: "Creative", emoji: "🎨", color: "#8b5cf6" },
+  { label: "Reflective", emoji: "🌙", color: "#6366f1" },
+  { label: "Energetic", emoji: "⚡", color: "#f59e0b" },
+  { label: "Sad", emoji: "😔", color: "#94a3b8" },
+  { label: "Anxious", emoji: "😰", color: "#fb7185" },
+  { label: "Tired", emoji: "😴", color: "#6b7280" },
+  { label: "Overwhelmed", emoji: "😵‍💫", color: "#f87171" },
 ];
 
 const energyLevels = [
-  { value: 1, label: 'Very Low', emoji: '😴', color: '#6b7280' },
-  { value: 2, label: 'Low', emoji: '😔', color: '#9ca3af' },
-  { value: 3, label: 'Medium', emoji: '😐', color: '#60a5fa' },
-  { value: 4, label: 'High', emoji: '😊', color: '#34d399' },
-  { value: 5, label: 'Very High', emoji: '🚀', color: '#f59e0b' },
+  { value: 1, label: "Very Low", emoji: "😴", color: "#6b7280" },
+  { value: 2, label: "Low", emoji: "😔", color: "#9ca3af" },
+  { value: 3, label: "Medium", emoji: "😐", color: "#60a5fa" },
+  { value: 4, label: "High", emoji: "😊", color: "#34d399" },
+  { value: 5, label: "Very High", emoji: "🚀", color: "#f59e0b" },
 ];
 
 // Predefined tags
 const commonTags = [
-  'grateful', 'anxious', 'hopeful', 'reflection', 'goals', 'family', 'work', 'study',
-  'health', 'friendship', 'growth', 'challenge', 'success', 'learning', 'mindful'
+  "grateful",
+  "anxious",
+  "hopeful",
+  "reflection",
+  "goals",
+  "family",
+  "work",
+  "study",
+  "health",
+  "friendship",
+  "growth",
+  "challenge",
+  "success",
+  "learning",
+  "mindful",
 ];
 
 export default function JournalPage() {
@@ -52,14 +65,16 @@ export default function JournalPage() {
   const [selectedMood, setSelectedMood] = useState<any>(null);
   const [energyLevel, setEnergyLevel] = useState<number | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
-  const [customTag, setCustomTag] = useState('');
+  const [customTag, setCustomTag] = useState("");
   const [canConvertToPost, setCanConvertToPost] = useState<boolean>(false);
-  const [activeTab, setActiveTab] = useState<'journal' | 'gratitude'>('journal');
+  const [activeTab, setActiveTab] = useState<"journal" | "gratitude">(
+    "journal",
+  );
   const router = useRouter();
 
   // Initialize supabase client on client-side only
   const supabase = useMemo(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       return createBrowserSupabaseClient();
     }
     return null;
@@ -67,23 +82,27 @@ export default function JournalPage() {
 
   const loadEntries = useCallback(async () => {
     if (!user?.email) return;
-    
+
     try {
       // Load journal entries
-      const res = await fetch(`/api/journal?user_email=${encodeURIComponent(user.email)}&limit=50`);
+      const res = await fetch(
+        `/api/journal?user_email=${encodeURIComponent(user.email)}&limit=50`,
+      );
       const data = await res.json();
       if (res.ok) {
         setEntries(data.entries.filter((e: any) => !e.is_gratitude) || []);
       }
 
       // Load gratitude entries
-      const gratRes = await fetch(`/api/journal?user_email=${encodeURIComponent(user.email)}&limit=50&is_gratitude=true`);
+      const gratRes = await fetch(
+        `/api/journal?user_email=${encodeURIComponent(user.email)}&limit=50&is_gratitude=true`,
+      );
       const gratData = await gratRes.json();
       if (gratRes.ok) {
         setGratitudeEntries(gratData.entries || []);
       }
     } catch (e) {
-      console.error('Failed to load entries:', e);
+      console.error("Failed to load entries:", e);
     }
   }, [user?.email]);
 
@@ -91,24 +110,24 @@ export default function JournalPage() {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const fd = new FormData(form);
-    
+
     const entryData = {
       user_email: user.email,
-      title: fd.get('title') as string,
-      content: fd.get('content') as string,
+      title: fd.get("title") as string,
+      content: fd.get("content") as string,
       mood: selectedMood?.label,
       mood_emoji: selectedMood?.emoji,
       energy_level: energyLevel,
       tags: selectedTags,
       is_gratitude: isGratitude,
-      can_convert_to_post: canConvertToPost
+      can_convert_to_post: canConvertToPost,
     };
 
     try {
-      const res = await fetch('/api/journal', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(entryData)
+      const res = await fetch("/api/journal", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(entryData),
       });
 
       if (res.ok) {
@@ -118,62 +137,63 @@ export default function JournalPage() {
         setSelectedMood(null);
         setEnergyLevel(null);
         setSelectedTags([]);
-        setCustomTag('');
+        setCustomTag("");
         setCanConvertToPost(false);
         await loadEntries();
       } else {
         const error = await res.json();
-        alert(error.error || 'Failed to add entry');
+        alert(error.error || "Failed to add entry");
       }
     } catch (e) {
-      alert('Failed to add entry');
+      alert("Failed to add entry");
     }
   };
 
   const convertToPost = async (entry: any) => {
     try {
-      const res = await fetch('/api/mood-posts', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/mood-posts", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           content: entry.content,
           mood: entry.mood,
           mood_emoji: entry.mood_emoji,
-          visibility: 'public',
+          visibility: "public",
           anonymous: false,
-          owner_email: user.email
-        })
+          owner_email: user.email,
+        }),
       });
 
       if (res.ok) {
-        alert('Entry converted to mood post! 🎉');
-        router.push('/mood-feed');
+        alert("Entry converted to mood post! 🎉");
+        router.push("/mood-feed");
       } else {
         const error = await res.json();
-        alert(error.error || 'Failed to convert to post');
+        alert(error.error || "Failed to convert to post");
       }
     } catch (e) {
-      alert('Failed to convert to post');
+      alert("Failed to convert to post");
     }
   };
 
   const addCustomTag = () => {
-    if (customTag.trim() && !selectedTags.includes(customTag.trim().toLowerCase())) {
+    if (
+      customTag.trim() &&
+      !selectedTags.includes(customTag.trim().toLowerCase())
+    ) {
       setSelectedTags([...selectedTags, customTag.trim().toLowerCase()]);
-      setCustomTag('');
+      setCustomTag("");
     }
   };
 
   const toggleTag = (tag: string) => {
-    setSelectedTags(prev => 
-      prev.includes(tag) 
-        ? prev.filter(t => t !== tag)
-        : [...prev, tag]
+    setSelectedTags((prev) =>
+      prev.includes(tag) ? prev.filter((t) => t !== tag) : [...prev, tag],
     );
   };
 
   useEffect(() => {
-    let mounted = true;
+    const mounted = true;
 
     const checkAuth = async () => {
       // Only set loading if we don't already have a user
@@ -192,7 +212,7 @@ export default function JournalPage() {
       const { data } = await supabase.auth.getSession();
       const session = data.session;
       if (!session) {
-        router.push('/');
+        router.push("/");
         return;
       }
       if (mounted) setUser(session.user);
@@ -225,36 +245,40 @@ export default function JournalPage() {
     );
   }
 
-  const currentEntries = activeTab === 'journal' ? entries : gratitudeEntries;
+  const currentEntries = activeTab === "journal" ? entries : gratitudeEntries;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">📝 Feel Journal</h1>
-          <p className="text-gray-600">Your private space for thoughts, reflections, and gratitude.</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            📝 Feel Journal
+          </h1>
+          <p className="text-gray-600">
+            Your private space for thoughts, reflections, and gratitude.
+          </p>
         </div>
 
         {/* Tab Navigation */}
         <div className="flex gap-4 mb-6">
           <button
-            onClick={() => setActiveTab('journal')}
+            onClick={() => setActiveTab("journal")}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'journal'
-                ? 'bg-blue-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              activeTab === "journal"
+                ? "bg-blue-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
             📝 Journal ({entries.length})
           </button>
           <button
-            onClick={() => setActiveTab('gratitude')}
+            onClick={() => setActiveTab("gratitude")}
             className={`px-4 py-2 rounded-lg font-medium transition-colors ${
-              activeTab === 'gratitude'
-                ? 'bg-green-500 text-white'
-                : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+              activeTab === "gratitude"
+                ? "bg-green-500 text-white"
+                : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
             🙏 Gratitude ({gratitudeEntries.length})
@@ -285,9 +309,12 @@ export default function JournalPage() {
         {(showNewEntry || showGratitude) && (
           <div className="bg-white rounded-xl p-6 soft-glow mb-8">
             <h3 className="text-lg font-semibold mb-4">
-              {showGratitude ? '🙏 New Gratitude Note' : '📝 New Journal Entry'}
+              {showGratitude ? "🙏 New Gratitude Note" : "📝 New Journal Entry"}
             </h3>
-            <form onSubmit={(e) => addEntry(e, showGratitude)} className="grid gap-4">
+            <form
+              onSubmit={(e) => addEntry(e, showGratitude)}
+              className="grid gap-4"
+            >
               {!showGratitude && (
                 <input
                   type="text"
@@ -299,7 +326,11 @@ export default function JournalPage() {
               )}
               <textarea
                 name="content"
-                placeholder={showGratitude ? "What are you grateful for today?" : "Write your thoughts, feelings, or reflections..."}
+                placeholder={
+                  showGratitude
+                    ? "What are you grateful for today?"
+                    : "Write your thoughts, feelings, or reflections..."
+                }
                 className="input-field h-32 resize-none"
                 required
                 maxLength={1000}
@@ -307,7 +338,9 @@ export default function JournalPage() {
 
               {/* Mood Selection */}
               <div>
-                <label className="block text-sm font-medium mb-2">Your mood:</label>
+                <label className="block text-sm font-medium mb-2">
+                  Your mood:
+                </label>
                 <div className="flex flex-wrap gap-2">
                   {moodOptions.map((mood) => (
                     <button
@@ -315,10 +348,14 @@ export default function JournalPage() {
                       type="button"
                       className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-colors ${
                         selectedMood?.label === mood.label
-                          ? 'bg-blue-100 border-2 border-blue-300'
-                          : 'bg-gray-100 border border-gray-300 hover:bg-gray-200'
+                          ? "bg-blue-100 border-2 border-blue-300"
+                          : "bg-gray-100 border border-gray-300 hover:bg-gray-200"
                       }`}
-                      onClick={() => setSelectedMood(selectedMood?.label === mood.label ? null : mood)}
+                      onClick={() =>
+                        setSelectedMood(
+                          selectedMood?.label === mood.label ? null : mood,
+                        )
+                      }
                     >
                       <span>{mood.emoji}</span>
                       <span>{mood.label}</span>
@@ -329,7 +366,9 @@ export default function JournalPage() {
 
               {/* Energy Level Selection */}
               <div>
-                <label className="block text-sm font-medium mb-2">Energy level:</label>
+                <label className="block text-sm font-medium mb-2">
+                  Energy level:
+                </label>
                 <div className="flex gap-2">
                   {energyLevels.map((level) => (
                     <button
@@ -337,11 +376,20 @@ export default function JournalPage() {
                       type="button"
                       className={`flex flex-col items-center gap-1 px-3 py-2 rounded-lg text-sm transition-all ${
                         energyLevel === level.value
-                          ? 'bg-green-100 border-2 border-green-300 transform scale-105'
-                          : 'bg-gray-100 border border-gray-300 hover:bg-gray-200 hover:scale-105'
+                          ? "bg-green-100 border-2 border-green-300 transform scale-105"
+                          : "bg-gray-100 border border-gray-300 hover:bg-gray-200 hover:scale-105"
                       }`}
-                      onClick={() => setEnergyLevel(energyLevel === level.value ? null : level.value)}
-                      style={{ backgroundColor: energyLevel === level.value ? level.color + '20' : undefined }}
+                      onClick={() =>
+                        setEnergyLevel(
+                          energyLevel === level.value ? null : level.value,
+                        )
+                      }
+                      style={{
+                        backgroundColor:
+                          energyLevel === level.value
+                            ? level.color + "20"
+                            : undefined,
+                      }}
                     >
                       <span className="text-lg">{level.emoji}</span>
                       <span className="text-xs">{level.label}</span>
@@ -360,8 +408,8 @@ export default function JournalPage() {
                       type="button"
                       className={`px-2 py-1 text-xs rounded-full transition-colors ${
                         selectedTags.includes(tag)
-                          ? 'bg-purple-100 border border-purple-300 text-purple-700'
-                          : 'bg-gray-100 border border-gray-300 hover:bg-gray-200'
+                          ? "bg-purple-100 border border-purple-300 text-purple-700"
+                          : "bg-gray-100 border border-gray-300 hover:bg-gray-200"
                       }`}
                       onClick={() => toggleTag(tag)}
                     >
@@ -377,7 +425,9 @@ export default function JournalPage() {
                     placeholder="Add custom tag"
                     className="input-field flex-1"
                     maxLength={20}
-                    onKeyPress={(e) => e.key === 'Enter' && (e.preventDefault(), addCustomTag())}
+                    onKeyPress={(e) =>
+                      e.key === "Enter" && (e.preventDefault(), addCustomTag())
+                    }
                   />
                   <button
                     type="button"
@@ -389,7 +439,7 @@ export default function JournalPage() {
                 </div>
                 {selectedTags.length > 0 && (
                   <div className="mt-2 text-sm text-gray-600">
-                    Selected: {selectedTags.map(tag => `#${tag}`).join(', ')}
+                    Selected: {selectedTags.map((tag) => `#${tag}`).join(", ")}
                   </div>
                 )}
               </div>
@@ -404,14 +454,20 @@ export default function JournalPage() {
                     onChange={(e) => setCanConvertToPost(e.target.checked)}
                     className="rounded"
                   />
-                  <label htmlFor="canConvertToPost" className="text-sm text-gray-700">
+                  <label
+                    htmlFor="canConvertToPost"
+                    className="text-sm text-gray-700"
+                  >
                     Allow this entry to be shared as a mood post
                   </label>
                 </div>
               )}
 
               <div className="flex gap-2">
-                <button type="submit" className="btn-primary rounded-xl px-4 py-2">
+                <button
+                  type="submit"
+                  className="btn-primary rounded-xl px-4 py-2"
+                >
                   Save Entry
                 </button>
                 <button
@@ -421,7 +477,7 @@ export default function JournalPage() {
                     setShowGratitude(false);
                     setSelectedMood(null);
                     setSelectedTags([]);
-                    setCustomTag('');
+                    setCustomTag("");
                   }}
                   className="btn-secondary rounded-xl px-4 py-2"
                 >
@@ -437,14 +493,22 @@ export default function JournalPage() {
           {currentEntries.length === 0 && (
             <div className="text-center py-12 text-gray-500">
               <p className="text-lg mb-2">
-                {activeTab === 'journal' ? 'No journal entries yet' : 'No gratitude notes yet'}
+                {activeTab === "journal"
+                  ? "No journal entries yet"
+                  : "No gratitude notes yet"}
               </p>
-              <p>Start writing your first {activeTab === 'journal' ? 'entry' : 'gratitude note'}! ✨</p>
+              <p>
+                Start writing your first{" "}
+                {activeTab === "journal" ? "entry" : "gratitude note"}! ✨
+              </p>
             </div>
           )}
 
           {currentEntries.map((entry) => (
-            <article key={entry.id} className="bg-white rounded-xl p-6 soft-glow">
+            <article
+              key={entry.id}
+              className="bg-white rounded-xl p-6 soft-glow"
+            >
               <div className="flex justify-between items-start mb-3">
                 <div className="flex items-center gap-3">
                   {entry.mood_emoji && (
@@ -452,11 +516,13 @@ export default function JournalPage() {
                   )}
                   <div>
                     {entry.title && (
-                      <h3 className="font-semibold text-gray-900">{entry.title}</h3>
+                      <h3 className="font-semibold text-gray-900">
+                        {entry.title}
+                      </h3>
                     )}
                     <div className="text-xs text-gray-500">
                       {new Date(entry.created_at).toLocaleString()}
-                      {entry.updated_at !== entry.created_at && ' (edited)'}
+                      {entry.updated_at !== entry.created_at && " (edited)"}
                     </div>
                   </div>
                 </div>
@@ -491,11 +557,21 @@ export default function JournalPage() {
               {(entry.mood || entry.energy_level) && (
                 <div className="flex flex-wrap gap-4 text-sm text-gray-600">
                   {entry.mood && (
-                    <span>Mood: {entry.mood_emoji} {entry.mood}</span>
+                    <span>
+                      Mood: {entry.mood_emoji} {entry.mood}
+                    </span>
                   )}
                   {entry.energy_level && (
                     <span>
-                      Energy: {energyLevels.find(l => l.value === entry.energy_level)?.emoji} {energyLevels.find(l => l.value === entry.energy_level)?.label}
+                      Energy:{" "}
+                      {
+                        energyLevels.find((l) => l.value === entry.energy_level)
+                          ?.emoji
+                      }{" "}
+                      {
+                        energyLevels.find((l) => l.value === entry.energy_level)
+                          ?.label
+                      }
                     </span>
                   )}
                 </div>

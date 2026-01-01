@@ -9,22 +9,22 @@ import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 
 // Goal categories with emojis
 const goalCategories = [
-  { value: 'study', label: '📚 Study', color: '#3b82f6' },
-  { value: 'exercise', label: '💪 Exercise', color: '#ef4444' },
-  { value: 'wellness', label: '🧘 Wellness', color: '#10b981' },
-  { value: 'social', label: '👥 Social', color: '#f59e0b' },
-  { value: 'creative', label: '🎨 Creative', color: '#8b5cf6' },
-  { value: 'personal', label: '✨ Personal', color: '#06b6d4' },
+  { value: "study", label: "📚 Study", color: "#3b82f6" },
+  { value: "exercise", label: "💪 Exercise", color: "#ef4444" },
+  { value: "wellness", label: "🧘 Wellness", color: "#10b981" },
+  { value: "social", label: "👥 Social", color: "#f59e0b" },
+  { value: "creative", label: "🎨 Creative", color: "#8b5cf6" },
+  { value: "personal", label: "✨ Personal", color: "#06b6d4" },
 ];
 
 // Mood options for goal completion
 const completionMoods = [
-  { value: 'accomplished', emoji: '🎉', label: 'Accomplished' },
-  { value: 'proud', emoji: '😊', label: 'Proud' },
-  { value: 'relieved', emoji: '😌', label: 'Relieved' },
-  { value: 'energized', emoji: '⚡', label: 'Energized' },
-  { value: 'calm', emoji: '🕊️', label: 'Calm' },
-  { value: 'grateful', emoji: '🙏', label: 'Grateful' },
+  { value: "accomplished", emoji: "🎉", label: "Accomplished" },
+  { value: "proud", emoji: "😊", label: "Proud" },
+  { value: "relieved", emoji: "😌", label: "Relieved" },
+  { value: "energized", emoji: "⚡", label: "Energized" },
+  { value: "calm", emoji: "🕊️", label: "Calm" },
+  { value: "grateful", emoji: "🙏", label: "Grateful" },
 ];
 
 export default function GoalsPage() {
@@ -33,14 +33,14 @@ export default function GoalsPage() {
   const [mounted, setMounted] = useState(false);
   const [user, setUser] = useState<any>(null);
   const [goals, setGoals] = useState<any[]>([]);
-  const [selectedDate, setSelectedDate] = useState('');
+  const [selectedDate, setSelectedDate] = useState("");
   const [showAddGoal, setShowAddGoal] = useState(false);
   const [completingGoal, setCompletingGoal] = useState<any>(null);
   const router = useRouter();
 
   // Initialize supabase client on client-side only
   const supabase = useMemo(() => {
-    if (typeof window !== 'undefined') {
+    if (typeof window !== "undefined") {
       return createBrowserSupabaseClient();
     }
     return null;
@@ -49,41 +49,46 @@ export default function GoalsPage() {
   // Set date after component mounts to prevent hydration mismatch
   useEffect(() => {
     setMounted(true);
-    setSelectedDate(new Date().toISOString().split('T')[0]);
+    setSelectedDate(new Date().toISOString().split("T")[0]);
   }, []);
 
-  const loadGoals = useCallback(async (date: string = selectedDate) => {
-    if (!user?.email) return;
-    
-    try {
-      const res = await fetch(`/api/goals?user_email=${encodeURIComponent(user.email)}&date=${date}`);
-      const data = await res.json();
-      if (res.ok) {
-        setGoals(data.goals || []);
+  const loadGoals = useCallback(
+    async (date: string = selectedDate) => {
+      if (!user?.email) return;
+
+      try {
+        const res = await fetch(
+          `/api/goals?user_email=${encodeURIComponent(user.email)}&date=${date}`,
+        );
+        const data = await res.json();
+        if (res.ok) {
+          setGoals(data.goals || []);
+        }
+      } catch (e) {
+        console.error("Failed to load goals:", e);
       }
-    } catch (e) {
-      console.error('Failed to load goals:', e);
-    }
-  }, [user?.email, selectedDate]);
+    },
+    [user?.email, selectedDate],
+  );
 
   const addGoal = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
     const fd = new FormData(form);
-    
+
     const goalData = {
       user_email: user.email,
-      title: fd.get('title') as string,
-      description: fd.get('description') as string,
-      category: fd.get('category') as string,
-      target_date: selectedDate
+      title: fd.get("title") as string,
+      description: fd.get("description") as string,
+      category: fd.get("category") as string,
+      target_date: selectedDate,
     };
 
     try {
-      const res = await fetch('/api/goals', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(goalData)
+      const res = await fetch("/api/goals", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(goalData),
       });
 
       if (res.ok) {
@@ -92,81 +97,82 @@ export default function GoalsPage() {
         await loadGoals();
       } else {
         const error = await res.json();
-        alert(error.error || 'Failed to add goal');
+        alert(error.error || "Failed to add goal");
       }
     } catch (e) {
-      alert('Failed to add goal');
+      alert("Failed to add goal");
     }
   };
 
   const completeGoal = async (goal: any, mood: string, reflection: string) => {
     try {
-      const res = await fetch('/api/goals', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
+      const res = await fetch("/api/goals", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           goal_id: goal.id,
           user_email: user.email,
           completed: true,
           mood_at_completion: mood,
-          reflection_note: reflection
-        })
+          reflection_note: reflection,
+        }),
       });
 
       if (res.ok) {
         setCompletingGoal(null);
         await loadGoals();
-        
+
         // Update streak for goal completion
         try {
-          await fetch('/api/streaks', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          await fetch("/api/streaks", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               user_email: user.email,
-              streak_type: 'goals'
-            })
+              streak_type: "goals",
+            }),
           });
         } catch (e) {
-          console.log('Failed to update streak');
+          console.log("Failed to update streak");
         }
 
         // Check for achievements
         try {
-          const completedCount = goals.filter(g => g.completed_at).length + 1;
+          const completedCount = goals.filter((g) => g.completed_at).length + 1;
           const today = new Date().toDateString();
-          const completedToday = goals.filter(g => {
-            if (!g.completed_at) return false;
-            const completedDate = new Date(g.completed_at).toDateString();
-            return completedDate === today;
-          }).length + 1;
+          const completedToday =
+            goals.filter((g) => {
+              if (!g.completed_at) return false;
+              const completedDate = new Date(g.completed_at).toDateString();
+              return completedDate === today;
+            }).length + 1;
 
-          await fetch('/api/achievements', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
+          await fetch("/api/achievements", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               user_email: user.email,
-              badge_type: 'goals',
+              badge_type: "goals",
               trigger_data: {
                 totalCompleted: completedCount,
-                completedToday: completedToday
-              }
-            })
+                completedToday: completedToday,
+              },
+            }),
           });
         } catch (e) {
-          console.log('Failed to check achievements');
+          console.log("Failed to check achievements");
         }
       } else {
         const error = await res.json();
-        alert(error.error || 'Failed to complete goal');
+        alert(error.error || "Failed to complete goal");
       }
     } catch (e) {
-      alert('Failed to complete goal');
+      alert("Failed to complete goal");
     }
   };
 
   useEffect(() => {
-    let mounted = true;
+    const mounted = true;
 
     const checkAuth = async () => {
       // Only set loading if we don't already have a user
@@ -185,7 +191,7 @@ export default function GoalsPage() {
       const { data } = await supabase.auth.getSession();
       const session = data.session;
       if (!session) {
-        router.push('/');
+        router.push("/");
         return;
       }
       if (mounted) setUser(session.user);
@@ -218,18 +224,25 @@ export default function GoalsPage() {
     );
   }
 
-  const completedGoals = goals.filter(g => g.completed_at);
-  const pendingGoals = goals.filter(g => !g.completed_at);
-  const completionRate = goals.length > 0 ? Math.round((completedGoals.length / goals.length) * 100) : 0;
+  const completedGoals = goals.filter((g) => g.completed_at);
+  const pendingGoals = goals.filter((g) => !g.completed_at);
+  const completionRate =
+    goals.length > 0
+      ? Math.round((completedGoals.length / goals.length) * 100)
+      : 0;
 
   return (
     <div className="min-h-screen bg-gray-50">
       <Navbar />
-      
+
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">🎯 Daily Goals</h1>
-          <p className="text-gray-600">Set and track your daily micro-goals for consistent progress.</p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">
+            🎯 Daily Goals
+          </h1>
+          <p className="text-gray-600">
+            Set and track your daily micro-goals for consistent progress.
+          </p>
         </div>
 
         {/* Top stats cards */}
@@ -238,14 +251,20 @@ export default function GoalsPage() {
             <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
               <div className="text-3xl">🔥</div>
               <div className="mt-2">
-                <StreakDisplay userEmail={user?.email || ''} streakType="goals" size="small" />
+                <StreakDisplay
+                  userEmail={user?.email || ""}
+                  streakType="goals"
+                  size="small"
+                />
               </div>
               <div className="text-xs text-gray-500 mt-1">Day Streak</div>
             </div>
 
             <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
               <div className="text-3xl">✅</div>
-              <div className="text-3xl font-bold mt-2">{completedGoals.length}/{goals.length || 1}</div>
+              <div className="text-3xl font-bold mt-2">
+                {completedGoals.length}/{goals.length || 1}
+              </div>
               <div className="text-xs text-gray-500 mt-1">Today's Progress</div>
             </div>
 
@@ -257,7 +276,10 @@ export default function GoalsPage() {
           </div>
 
           <div className="mt-6 bg-white rounded-full h-3 overflow-hidden">
-            <div className="h-full bg-emerald-400" style={{ width: `${completionRate}%` }} />
+            <div
+              className="h-full bg-emerald-400"
+              style={{ width: `${completionRate}%` }}
+            />
           </div>
         </div>
 
@@ -304,12 +326,17 @@ export default function GoalsPage() {
                 />
                 <select name="category" className="input-field w-48" required>
                   <option value="">Select Category</option>
-                  {goalCategories.map(cat => (
-                    <option key={cat.value} value={cat.value}>{cat.label}</option>
+                  {goalCategories.map((cat) => (
+                    <option key={cat.value} value={cat.value}>
+                      {cat.label}
+                    </option>
                   ))}
                 </select>
                 <div className="flex gap-2">
-                  <button type="submit" className="btn-primary rounded-xl px-4 py-2">
+                  <button
+                    type="submit"
+                    className="btn-primary rounded-xl px-4 py-2"
+                  >
                     Add Goal
                   </button>
                   <button
@@ -334,18 +361,27 @@ export default function GoalsPage() {
                 📋 Pending Goals ({pendingGoals.length})
               </h2>
               <div className="grid gap-3">
-                {pendingGoals.map(goal => {
-                  const category = goalCategories.find(c => c.value === goal.category);
+                {pendingGoals.map((goal) => {
+                  const category = goalCategories.find(
+                    (c) => c.value === goal.category,
+                  );
                   return (
-                    <div key={goal.id} className="bg-white rounded-2xl p-4 soft-glow flex items-center justify-between">
+                    <div
+                      key={goal.id}
+                      className="bg-white rounded-2xl p-4 soft-glow flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-2xl">
-                          {category?.label?.split(' ')[0] || '•'}
+                          {category?.label?.split(" ")[0] || "•"}
                         </div>
                         <div>
-                          <h3 className="font-medium text-gray-900">{goal.title}</h3>
+                          <h3 className="font-medium text-gray-900">
+                            {goal.title}
+                          </h3>
                           {goal.description && (
-                            <p className="text-sm text-gray-600 mt-1">{goal.description}</p>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {goal.description}
+                            </p>
                           )}
                         </div>
                       </div>
@@ -371,29 +407,47 @@ export default function GoalsPage() {
                 ✅ Completed Goals ({completedGoals.length})
               </h2>
               <div className="grid gap-3">
-                {completedGoals.map(goal => {
-                  const category = goalCategories.find(c => c.value === goal.category);
-                  const completionMood = completionMoods.find(m => m.value === goal.mood_at_completion);
+                {completedGoals.map((goal) => {
+                  const category = goalCategories.find(
+                    (c) => c.value === goal.category,
+                  );
+                  const completionMood = completionMoods.find(
+                    (m) => m.value === goal.mood_at_completion,
+                  );
                   return (
-                    <div key={goal.id} className="bg-white rounded-2xl p-4 soft-glow flex items-center justify-between">
+                    <div
+                      key={goal.id}
+                      className="bg-white rounded-2xl p-4 soft-glow flex items-center justify-between"
+                    >
                       <div className="flex items-center gap-4">
-                        <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-2xl text-emerald-700">✓</div>
+                        <div className="w-12 h-12 rounded-full bg-emerald-100 flex items-center justify-center text-2xl text-emerald-700">
+                          ✓
+                        </div>
                         <div>
-                          <h3 className="font-medium text-gray-900 line-through text-gray-500">{goal.title}</h3>
+                          <h3 className="font-medium text-gray-900 line-through text-gray-500">
+                            {goal.title}
+                          </h3>
                           {goal.description && (
-                            <p className="text-sm text-gray-600 mt-1">{goal.description}</p>
+                            <p className="text-sm text-gray-600 mt-1">
+                              {goal.description}
+                            </p>
                           )}
                           {goal.reflection_note && (
                             <div className="mt-2 p-2 bg-green-50 rounded-lg">
-                              <div className="text-xs text-green-700 font-medium mb-1">Reflection:</div>
-                              <p className="text-sm text-green-800">{goal.reflection_note}</p>
+                              <div className="text-xs text-green-700 font-medium mb-1">
+                                Reflection:
+                              </div>
+                              <p className="text-sm text-green-800">
+                                {goal.reflection_note}
+                              </p>
                             </div>
                           )}
                         </div>
                       </div>
 
                       <div className="text-xs text-gray-500">
-                        Completed: {new Date(goal.completed_at).toLocaleString()}
+                        Completed:{" "}
+                        {new Date(goal.completed_at).toLocaleString()}
                       </div>
                     </div>
                   );
@@ -418,18 +472,26 @@ export default function GoalsPage() {
             <h3 className="text-lg font-semibold mb-2">Complete Goal 🎉</h3>
             <p className="text-gray-700 mb-4">"{completingGoal.title}"</p>
 
-            <form onSubmit={(e) => {
-              e.preventDefault();
-              const fd = new FormData(e.target as HTMLFormElement);
-              const mood = fd.get('mood') as string;
-              const reflection = fd.get('reflection') as string;
-              completeGoal(completingGoal, mood, reflection);
-            }}>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const fd = new FormData(e.target as HTMLFormElement);
+                const mood = fd.get("mood") as string;
+                const reflection = fd.get("reflection") as string;
+                completeGoal(completingGoal, mood, reflection);
+              }}
+            >
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">How do you feel?</label>
-                <select name="mood" className="w-full rounded-lg border border-gray-200 px-3 py-2" required>
+                <label className="block text-sm font-medium mb-2">
+                  How do you feel?
+                </label>
+                <select
+                  name="mood"
+                  className="w-full rounded-lg border border-gray-200 px-3 py-2"
+                  required
+                >
                   <option value="">Select your mood</option>
-                  {completionMoods.map(mood => (
+                  {completionMoods.map((mood) => (
                     <option key={mood.value} value={mood.value}>
                       {mood.emoji} {mood.label}
                     </option>
@@ -438,7 +500,9 @@ export default function GoalsPage() {
               </div>
 
               <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Reflection (optional)</label>
+                <label className="block text-sm font-medium mb-2">
+                  Reflection (optional)
+                </label>
                 <textarea
                   name="reflection"
                   placeholder="How did this goal make you feel? What did you learn?"
@@ -448,7 +512,10 @@ export default function GoalsPage() {
               </div>
 
               <div className="flex items-center gap-3">
-                <button type="submit" className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-full">
+                <button
+                  type="submit"
+                  className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-full"
+                >
                   Complete ✓
                 </button>
                 <button

@@ -6,13 +6,13 @@ import Providers from "../components/Providers";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],
-  display: 'swap',
+  display: "swap",
 });
 
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
-  display: 'swap',
+  display: "swap",
 });
 
 export const metadata: Metadata = {

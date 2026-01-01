@@ -14,17 +14,26 @@ export async function POST(req: Request) {
     }
 
     if (!acceptTerms) {
-      return NextResponse.json({ error: "Terms must be accepted" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Terms must be accepted" },
+        { status: 400 },
+      );
     }
 
     if (password.length < 6) {
-      return NextResponse.json({ error: "Password too short" }, { status: 400 });
+      return NextResponse.json(
+        { error: "Password too short" },
+        { status: 400 },
+      );
     }
 
     // NOTE: This is a mock registration endpoint.
     // Replace with real user creation (database, hashing, email confirmation).
 
-    return NextResponse.json({ ok: true, message: "User created (mock)" }, { status: 201 });
+    return NextResponse.json(
+      { ok: true, message: "User created (mock)" },
+      { status: 201 },
+    );
   } catch (err) {
     return NextResponse.json({ error: "Invalid request" }, { status: 400 });
   }

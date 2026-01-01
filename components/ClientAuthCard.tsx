@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { useEffect, useState } from 'react';
-import AuthCard from './AuthCard';
+import { useEffect, useState } from "react";
+import AuthCard from "./AuthCard";
 
 export default function ClientAuthCard() {
   const [isClient, setIsClient] = useState(false);
