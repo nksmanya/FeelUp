@@ -413,11 +413,11 @@ export default function GoalsPage() {
 
       {/* Goal Completion Modal */}
       {completingGoal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white rounded-xl p-6 max-w-md w-full">
-            <h3 className="text-lg font-semibold mb-4">Complete Goal 🎉</h3>
+        <div className="fixed inset-0 bg-black/20 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+          <div className="bg-white rounded-xl p-6 max-w-sm w-full">
+            <h3 className="text-lg font-semibold mb-2">Complete Goal 🎉</h3>
             <p className="text-gray-700 mb-4">"{completingGoal.title}"</p>
-            
+
             <form onSubmit={(e) => {
               e.preventDefault();
               const fd = new FormData(e.target as HTMLFormElement);
@@ -427,7 +427,7 @@ export default function GoalsPage() {
             }}>
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-2">How do you feel?</label>
-                <select name="mood" className="input-field w-full" required>
+                <select name="mood" className="w-full rounded-lg border border-gray-200 px-3 py-2" required>
                   <option value="">Select your mood</option>
                   {completionMoods.map(mood => (
                     <option key={mood.value} value={mood.value}>
@@ -436,25 +436,25 @@ export default function GoalsPage() {
                   ))}
                 </select>
               </div>
-              
+
               <div className="mb-4">
                 <label className="block text-sm font-medium mb-2">Reflection (optional)</label>
                 <textarea
                   name="reflection"
                   placeholder="How did this goal make you feel? What did you learn?"
-                  className="input-field h-20 resize-none w-full"
+                  className="w-full rounded-lg border border-gray-200 p-3 h-24 resize-none"
                   maxLength={300}
                 />
               </div>
-              
-              <div className="flex gap-2">
-                <button type="submit" className="btn-primary rounded-xl px-4 py-2 flex-1">
-                  Complete Goal ✓
+
+              <div className="flex items-center gap-3">
+                <button type="submit" className="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-3 rounded-full">
+                  Complete ✓
                 </button>
                 <button
                   type="button"
                   onClick={() => setCompletingGoal(null)}
-                  className="btn-secondary rounded-xl px-4 py-2"
+                  className="px-4 py-2 border border-gray-200 rounded-lg text-sm"
                 >
                   Cancel
                 </button>
