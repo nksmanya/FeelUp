@@ -41,6 +41,26 @@ export default function MoodFeedPage() {
   const [newComment, setNewComment] = useState<{[key: string]: string}>({});
   const router = useRouter();
 
+  function timeAgo(date?: string) {
+    if (!date) return '';
+    const then = new Date(date).getTime();
+    const now = Date.now();
+    const sec = Math.floor((now - then) / 1000);
+    if (sec < 60) return 'just now';
+    const min = Math.floor(sec / 60);
+    if (min < 60) return `${min}m ago`;
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return `${hr}h ago`;
+    const days = Math.floor(hr / 24);
+    if (days < 7) return `${days}d ago`;
+    const weeks = Math.floor(days / 7);
+    if (weeks < 5) return `${weeks}w ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months}mo ago`;
+    const years = Math.floor(days / 365);
+    return `${years}y ago`;
+  }
+
   // Initialize supabase client on client-side only
   const supabase = useMemo(() => {
     if (typeof window !== 'undefined') {
@@ -352,7 +372,7 @@ export default function MoodFeedPage() {
                     )}
                   </div>
                   <div className="text-xs text-[var(--feelup-muted)]">
-                    {new Date(post.created_at).toLocaleString()}
+                    {timeAgo(post.created_at)}
                   </div>
                 </div>
               </div>
@@ -415,7 +435,7 @@ export default function MoodFeedPage() {
                           <div className="bg-gray-50 rounded-lg px-3 py-2">
                             <div className="text-xs text-gray-500 mb-1">
                               {comment.anonymous ? 'Someone' : comment.profiles?.full_name || comment.user_email || 'Anonymous'}
-                              <span className="ml-2">{new Date(comment.created_at).toLocaleString()}</span>
+                              <span className="ml-2">{timeAgo(comment.created_at)}</span>
                             </div>
                             <div className="text-sm text-gray-800">{comment.content}</div>
                           </div>
