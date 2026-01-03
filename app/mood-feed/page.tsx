@@ -49,6 +49,7 @@ export default function MoodFeedPage() {
   const [imageFile, setImageFile] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
+  const [composerOpen, setComposerOpen] = useState<boolean>(false);
 
   function timeAgo(date?: string) {
     if (!date) return "";
@@ -291,7 +292,16 @@ export default function MoodFeedPage() {
         </div>
 
         <section className="mb-8 bg-white rounded-xl p-6 shadow-sm">
-          <form
+          {!composerOpen ? (
+            <div
+              className="flex items-center gap-3 p-3 rounded-full border border-gray-200 hover:shadow-sm cursor-pointer"
+              onClick={() => setComposerOpen(true)}
+            >
+              <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white">🙂</div>
+              <div className="flex-1 text-gray-600">Start a post</div>
+            </div>
+          ) : (
+            <form
             onSubmit={async (e) => {
               e.preventDefault();
               const form = e.target as HTMLFormElement;
@@ -463,7 +473,8 @@ export default function MoodFeedPage() {
                 Share ✨
               </button>
             </div>
-          </form>
+            </form>
+          )}
         </section>
 
         <section className="grid gap-4" id="posts">
