@@ -292,27 +292,50 @@ export default function MoodFeedPage() {
             onSubmit={async (e) => {
               e.preventDefault();
               const form = e.target as HTMLFormElement;
-              const fd = new FormData(form);
-              const content = (fd.get("content") as string) || "";
-              const visibility = (fd.get("visibility") as string) || "public";
-              const anonymous = fd.get("anonymous") === "on";
+                const fd = new FormData(form);
+                const content = (fd.get("content") as string) || "";
+                const visibility = (fd.get("visibility") as string) || "public";
+                const anonymous = fd.get("anonymous") === "on";
+                const file = (fd.get("image") as File) || null;
+                let image_base64: string | null = null;
+                let image_name: string | null = null;
+
+                if (file && file.size > 0) {
+                  image_name = file.name;
+                  image_base64 = await new Promise<string | null>((resolve) => {
+                    const reader = new FileReader();
+                    reader.onload = () => {
+                      const result = reader.result as string;
+                      const parts = result.split(",");
+                      resolve(parts[1] || null);
+                    };
+                    reader.onerror = () => resolve(null);
+                    reader.readAsDataURL(file);
+                  });
+                }
 
               if (!content.trim()) return alert("Please write something");
 
               const owner_email = user?.email || null;
 
+              const payload: any = {
+                content,
+                mood: selectedMood?.label,
+                mood_emoji: selectedMood?.emoji,
+                mood_color: selectedMood?.color,
+                visibility,
+                anonymous,
+                owner_email,
+              };
+              if (image_base64 && image_name) {
+                payload.image_base64 = image_base64;
+                payload.image_name = image_name;
+              }
+
               const res = await fetch("/api/mood-posts", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                  content,
-                  mood: selectedMood?.label,
-                  mood_emoji: selectedMood?.emoji,
-                  mood_color: selectedMood?.color,
-                  visibility,
-                  anonymous,
-                  owner_email,
-                }),
+                body: JSON.stringify(payload),
               });
               const data = await res.json();
               if (!res.ok) return alert(data?.error || "Could not post");
@@ -329,6 +352,11 @@ export default function MoodFeedPage() {
               placeholder="How are you feeling? Share your thoughts..."
               maxLength={500}
             />
+
+            <label className="text-sm">
+              Add an image (optional)
+              <input type="file" name="image" accept="image/*" className="mt-2" />
+            </label>
 
             {/* Mood Selection */}
             <div>
@@ -437,6 +465,11 @@ export default function MoodFeedPage() {
               <div className="mb-4 text-gray-800 leading-relaxed">
                 {post.content}
               </div>
+              {post.image_url && (
+                <div className="mt-4">
+                  <img src={post.image_url} alt="post image" className="w-full rounded" />
+                </div>
+              )}
 
               {/* Reaction Buttons */}
               <div className="flex gap-2 pt-2 border-t border-gray-100">

@@ -111,6 +111,24 @@ export default function JournalPage() {
     const form = e.target as HTMLFormElement;
     const fd = new FormData(form);
 
+    const file = (fd.get("image") as File) || null;
+    let image_base64: string | null = null;
+    let image_name: string | null = null;
+
+    if (file && file.size > 0) {
+      image_name = file.name;
+      image_base64 = await new Promise<string | null>((resolve) => {
+        const reader = new FileReader();
+        reader.onload = () => {
+          const result = reader.result as string;
+          const parts = result.split(",");
+          resolve(parts[1] || null);
+        };
+        reader.onerror = () => resolve(null);
+        reader.readAsDataURL(file);
+      });
+    }
+
     const entryData = {
       user_email: user.email,
       title: fd.get("title") as string,
@@ -121,6 +139,8 @@ export default function JournalPage() {
       tags: selectedTags,
       is_gratitude: isGratitude,
       can_convert_to_post: canConvertToPost,
+      image_base64,
+      image_name,
     };
 
     try {
@@ -336,6 +356,11 @@ export default function JournalPage() {
                 maxLength={1000}
               />
 
+              <label className="text-sm">
+                Add an image (optional)
+                <input type="file" name="image" accept="image/*" className="mt-2" />
+              </label>
+
               {/* Mood Selection */}
               <div>
                 <label className="block text-sm font-medium mb-2">
@@ -540,6 +565,12 @@ export default function JournalPage() {
               <div className="text-gray-800 leading-relaxed mb-3 whitespace-pre-wrap">
                 {entry.content}
               </div>
+
+              {entry.image_url && (
+                <div className="mt-3">
+                  <img src={entry.image_url} alt="journal image" className="w-full rounded" />
+                </div>
+              )}
 
               {entry.tags && entry.tags.length > 0 && (
                 <div className="flex flex-wrap gap-1 mb-2">

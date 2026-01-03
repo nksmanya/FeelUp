@@ -1,9 +1,17 @@
 import { NextResponse } from "next/server";
 import fs from "fs";
 import path from "path";
+import { v2 as cloudinary } from "cloudinary";
 
 // Mock database using JSON file for development
 const DB_PATH = path.join(process.cwd(), "data", "journal_entries.json");
+
+// Configure Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET,
+});
 
 function ensureDataDir() {
   const dataDir = path.dirname(DB_PATH);
@@ -84,6 +92,8 @@ export async function POST(req: Request) {
       tags,
       is_gratitude,
       can_convert_to_post,
+      image_base64,
+      image_name,
     } = await req.json();
 
     if (!user_email || !content?.trim()) {
@@ -99,6 +109,7 @@ export async function POST(req: Request) {
       user_email: user_email,
       title: title?.trim() || null,
       content: content.trim(),
+      image_url: null as string | null,
       mood_tag: mood || null,
       mood_emoji: mood_emoji || null,
       energy_level: energy_level || null,
@@ -108,6 +119,25 @@ export async function POST(req: Request) {
       created_at: new Date().toISOString(),
       updated_at: new Date().toISOString(),
     };
+
+    // Upload image to Cloudinary if provided
+    if (image_base64 && image_name && process.env.CLOUDINARY_CLOUD_NAME) {
+      try {
+        const ext = path.extname(image_name).toLowerCase().replace(".", "");
+        let mime = "image/png";
+        if (ext === "jpg" || ext === "jpeg") mime = "image/jpeg";
+        else if (ext === "webp") mime = "image/webp";
+        else if (ext === "gif") mime = "image/gif";
+
+        const dataUri = `data:${mime};base64,${image_base64}`;
+        const uploadRes = await cloudinary.uploader.upload(dataUri, {
+          folder: "feelup/journal",
+        });
+        newEntry.image_url = uploadRes.secure_url;
+      } catch (e) {
+        console.error("Cloudinary upload failed for journal image:", e);
+      }
+    }
 
     allEntries.push(newEntry);
     writeEntries(allEntries);
