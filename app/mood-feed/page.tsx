@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { createBrowserSupabaseClient } from "../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
@@ -46,6 +46,9 @@ export default function MoodFeedPage() {
   );
   const [newComment, setNewComment] = useState<{ [key: string]: string }>({});
   const router = useRouter();
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
 
   function timeAgo(date?: string) {
     if (!date) return "";
@@ -292,29 +295,29 @@ export default function MoodFeedPage() {
             onSubmit={async (e) => {
               e.preventDefault();
               const form = e.target as HTMLFormElement;
-                const fd = new FormData(form);
-                const content = (fd.get("content") as string) || "";
-                const visibility = (fd.get("visibility") as string) || "public";
-                const anonymous = fd.get("anonymous") === "on";
-                const file = (fd.get("image") as File) || null;
-                let image_base64: string | null = null;
-                let image_name: string | null = null;
+              const fd = new FormData(form);
+              const content = (fd.get("content") as string) || "";
+              const visibility = (fd.get("visibility") as string) || "public";
+              const anonymous = fd.get("anonymous") === "on";
 
-                if (file && file.size > 0) {
-                  image_name = file.name;
-                  image_base64 = await new Promise<string | null>((resolve) => {
-                    const reader = new FileReader();
-                    reader.onload = () => {
-                      const result = reader.result as string;
-                      const parts = result.split(",");
-                      resolve(parts[1] || null);
-                    };
-                    reader.onerror = () => resolve(null);
-                    reader.readAsDataURL(file);
-                  });
-                }
+              if (!content.trim() && !imageFile) return alert("Please write something or add an image");
 
-              if (!content.trim()) return alert("Please write something");
+              let image_base64: string | null = null;
+              let image_name: string | null = null;
+
+              if (imageFile) {
+                image_name = imageFile.name;
+                image_base64 = await new Promise<string | null>((resolve) => {
+                  const reader = new FileReader();
+                  reader.onload = () => {
+                    const result = reader.result as string;
+                    const parts = result.split(",");
+                    resolve(parts[1] || null);
+                  };
+                  reader.onerror = () => resolve(null);
+                  reader.readAsDataURL(imageFile);
+                });
+              }
 
               const owner_email = user?.email || null;
 
@@ -341,6 +344,11 @@ export default function MoodFeedPage() {
               if (!res.ok) return alert(data?.error || "Could not post");
               form.reset();
               setSelectedMood(null);
+              setImageFile(null);
+              if (imagePreview) {
+                URL.revokeObjectURL(imagePreview);
+                setImagePreview(null);
+              }
               // refresh posts
               await loadPosts();
             }}
@@ -353,10 +361,52 @@ export default function MoodFeedPage() {
               maxLength={500}
             />
 
-            <label className="text-sm">
-              Add an image (optional)
-              <input type="file" name="image" accept="image/*" className="mt-2" />
-            </label>
+            <div className="text-sm">
+              <button
+                type="button"
+                className="btn-secondary rounded px-3 py-2"
+                onClick={() => imageInputRef.current?.click()}
+              >
+                + Add image (optional)
+              </button>
+              <input
+                ref={imageInputRef}
+                type="file"
+                name="image"
+                accept="image/*"
+                className="hidden"
+                onChange={(ev) => {
+                  const f = (ev.target as HTMLInputElement).files?.[0] || null;
+                  setImageFile(f);
+                  if (f) setImagePreview(URL.createObjectURL(f));
+                  else {
+                    if (imagePreview) URL.revokeObjectURL(imagePreview);
+                    setImagePreview(null);
+                  }
+                }}
+              />
+            </div>
+
+            {imagePreview && (
+              <div className="flex items-start gap-2 mt-2">
+                <img src={imagePreview} alt="preview" className="w-24 h-24 object-cover rounded" />
+                <div>
+                  <div className="text-sm mb-2">Selected image</div>
+                  <button
+                    type="button"
+                    className="text-xs text-red-600"
+                      onClick={() => {
+                      if (imagePreview) URL.revokeObjectURL(imagePreview);
+                      setImagePreview(null);
+                      setImageFile(null);
+                      if (imageInputRef.current) imageInputRef.current.value = "";
+                    }}
+                  >
+                    Remove
+                  </button>
+                </div>
+              </div>
+            )}
 
             {/* Mood Selection */}
             <div>

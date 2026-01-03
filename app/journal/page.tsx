@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { createBrowserSupabaseClient } from "../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
@@ -66,6 +66,9 @@ export default function JournalPage() {
   const [energyLevel, setEnergyLevel] = useState<number | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
   const [customTag, setCustomTag] = useState("");
+  const [imageFile, setImageFile] = useState<File | null>(null);
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [canConvertToPost, setCanConvertToPost] = useState<boolean>(false);
   const [activeTab, setActiveTab] = useState<"journal" | "gratitude">(
     "journal",
@@ -111,7 +114,7 @@ export default function JournalPage() {
     const form = e.target as HTMLFormElement;
     const fd = new FormData(form);
 
-    const file = (fd.get("image") as File) || null;
+    const file = imageFile;
     let image_base64: string | null = null;
     let image_name: string | null = null;
 
@@ -159,6 +162,11 @@ export default function JournalPage() {
         setSelectedTags([]);
         setCustomTag("");
         setCanConvertToPost(false);
+        if (imagePreview) {
+          URL.revokeObjectURL(imagePreview);
+          setImagePreview(null);
+        }
+        setImageFile(null);
         await loadEntries();
       } else {
         const error = await res.json();
@@ -356,10 +364,52 @@ export default function JournalPage() {
                 maxLength={1000}
               />
 
-              <label className="text-sm">
-                Add an image (optional)
-                <input type="file" name="image" accept="image/*" className="mt-2" />
-              </label>
+              <div className="text-sm">
+                <button
+                  type="button"
+                  className="btn-secondary rounded px-3 py-2"
+                  onClick={() => imageInputRef.current?.click()}
+                >
+                  + Add image (optional)
+                </button>
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  name="image"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(ev) => {
+                    const f = (ev.target as HTMLInputElement).files?.[0] || null;
+                    setImageFile(f);
+                    if (f) setImagePreview(URL.createObjectURL(f));
+                    else {
+                      if (imagePreview) URL.revokeObjectURL(imagePreview);
+                      setImagePreview(null);
+                    }
+                  }}
+                />
+              </div>
+
+              {imagePreview && (
+                <div className="flex items-start gap-2 mt-2">
+                  <img src={imagePreview} alt="preview" className="w-24 h-24 object-cover rounded" />
+                  <div>
+                    <div className="text-sm mb-2">Selected image</div>
+                    <button
+                      type="button"
+                      className="text-xs text-red-600"
+                      onClick={() => {
+                        if (imagePreview) URL.revokeObjectURL(imagePreview);
+                        setImagePreview(null);
+                        setImageFile(null);
+                        if (imageInputRef.current) imageInputRef.current.value = "";
+                      }}
+                    >
+                      Remove
+                    </button>
+                  </div>
+                </div>
+              )}
 
               {/* Mood Selection */}
               <div>
