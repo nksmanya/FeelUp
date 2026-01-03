@@ -32,6 +32,7 @@ export default function ProfilePage() {
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
   const [userPosts, setUserPosts] = useState<any[]>([]);
+  const [savedPosts, setSavedPosts] = useState<any[]>([]);
 
   const userId = params?.id as string;
 
@@ -46,6 +47,9 @@ export default function ProfilePage() {
     if (profile?.email) {
       loadUserPosts();
     }
+    if (session?.user?.email && session.user.email === profile?.email) {
+      loadSaved();
+    }
   }, [profile]);
 
   const loadProfile = async () => {
@@ -59,6 +63,25 @@ export default function ProfilePage() {
       console.error("Failed to load profile:", error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadSaved = async () => {
+    if (!session?.user?.email) return;
+    try {
+      const res = await fetch(`/api/bookmarks?user_email=${encodeURIComponent(session.user.email)}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      const ids: string[] = data.posts || [];
+      if (ids.length === 0) return setSavedPosts([]);
+      // fetch posts by ids
+      const allRes = await fetch(`/api/mood-posts?limit=100`);
+      if (!allRes.ok) return;
+      const allData = await allRes.json();
+      const posts = (allData.posts || []).filter((p: any) => ids.includes(p.id));
+      setSavedPosts(posts);
+    } catch (e) {
+      console.error('Failed to load saved posts', e);
     }
   };
 
@@ -421,6 +444,26 @@ export default function ProfilePage() {
                   </div>
                 )}
               </div>
+
+              {/* Saved posts (only visible on your own profile) */}
+              {session?.user?.email === profile.email && (
+                <div className="bg-white rounded-xl shadow-sm p-6 mt-6">
+                  <h2 className="text-xl font-semibold text-gray-900 mb-4">Saved</h2>
+                  {savedPosts.length === 0 ? (
+                    <div className="text-center py-8 text-gray-500">No saved posts.</div>
+                  ) : (
+                    <div className="space-y-4">
+                      {savedPosts.map((p) => (
+                        <div key={p.id} className="p-3 bg-gray-50 rounded-lg">
+                          <div className="text-sm text-gray-600 mb-1">{timeAgo(p.created_at)}</div>
+                          <div className="text-gray-800 mb-2">{p.content}</div>
+                          {p.image_url && <img src={p.image_url} alt="post" className="w-full rounded" />}
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              )}
           </div>
 
           {/* Achievements */}

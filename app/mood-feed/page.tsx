@@ -52,6 +52,7 @@ export default function MoodFeedPage() {
   const [composerOpen, setComposerOpen] = useState<boolean>(false);
   const [editPostId, setEditPostId] = useState<string | null>(null);
   const [editContent, setEditContent] = useState<string>("");
+  const [bookmarkedPosts, setBookmarkedPosts] = useState<string[]>([]);
 
   function timeAgo(date?: string) {
     if (!date) return "";
@@ -263,7 +264,21 @@ export default function MoodFeedPage() {
     if (user?.email && posts.length === 0) {
       loadPosts().catch((e) => console.log("Posts loading failed:", e));
     }
+    if (user?.email) loadBookmarkedPosts();
   }, [user, loadPosts]);
+
+  const loadBookmarkedPosts = async () => {
+    if (!user?.email) return;
+    try {
+      const res = await fetch(`/api/bookmarks?user_email=${encodeURIComponent(user.email)}`);
+      if (res.ok) {
+        const data = await res.json();
+        setBookmarkedPosts(data.posts || []);
+      }
+    } catch (e) {
+      console.error('Failed to load bookmarks', e);
+    }
+  };
 
   if (loading) {
     return (
@@ -285,12 +300,7 @@ export default function MoodFeedPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            ✨ Mood Feed
-          </h1>
-          <p className="text-gray-600">
-            Share your feelings and support others in our positive community.
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 mb-2">✨ Mood Feed</h1>
         </div>
 
         <section className="mb-8 bg-white rounded-xl p-6 shadow-sm">
@@ -494,9 +504,9 @@ export default function MoodFeedPage() {
 
           {posts.map((post: any) => (
             <article
-              key={post.id}
-              className="rounded-xl bg-white p-6 soft-glow"
-            >
+                key={post.id}
+                className="max-w-2xl mx-auto rounded-xl bg-white p-6 soft-glow"
+              >
               <div className="flex items-start gap-3 mb-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-sm">
                   {post.anonymous
@@ -619,35 +629,83 @@ export default function MoodFeedPage() {
                     <>
                       <button
                         type="button"
-                        className="text-xs px-2 py-1 bg-gray-100 rounded"
-                        onClick={() => {
-                          setEditPostId(post.id);
-                          setEditContent(post.content || "");
-                        }}
-                      >
-                        Edit
-                      </button>
-                      <button
-                        type="button"
-                        className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded"
+                        aria-label="Repost"
+                        title="Repost"
+                        className="p-2 rounded-md bg-gray-50 hover:bg-gray-100"
                         onClick={async () => {
-                          if (!confirm("Delete this post?")) return;
+                          if (!user?.email) return alert('Sign in to repost');
                           try {
-                            const res = await fetch(`/api/mood-posts?id=${encodeURIComponent(post.id)}&owner_email=${encodeURIComponent(user.email)}`, {
-                              method: "DELETE",
+                            const res = await fetch('/api/mood-posts', {
+                              method: 'POST',
+                              headers: { 'Content-Type': 'application/json' },
+                              body: JSON.stringify({
+                                content: post.content,
+                                mood: post.mood,
+                                mood_emoji: post.mood_emoji,
+                                owner_email: user.email,
+                                image_url: post.image_url || null,
+                                reposted_from: post.id,
+                              }),
                             });
                             if (!res.ok) {
                               const err = await res.json();
-                              alert(err?.error || "Failed to delete post");
-                              return;
+                              return alert(err?.error || 'Failed to repost');
                             }
                             await loadPosts();
+                            alert('Reposted');
                           } catch (e) {
-                            alert("Failed to delete post");
+                            alert('Failed to repost');
                           }
                         }}
                       >
-                        Delete
+                        🔁
+                      </button>
+
+                      <button
+                        type="button"
+                        aria-label={bookmarkedPosts.includes(post.id) ? 'Remove bookmark' : 'Save'}
+                        title={bookmarkedPosts.includes(post.id) ? 'Remove bookmark' : 'Save'}
+                        className="p-2 rounded-md bg-gray-50 hover:bg-gray-100"
+                        onClick={async () => {
+                          if (!user?.email) return alert('Sign in to save posts');
+                          try {
+                            if (!bookmarkedPosts.includes(post.id)) {
+                              const res = await fetch('/api/bookmarks', {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ user_email: user.email, post_id: post.id }),
+                              });
+                              if (!res.ok) throw new Error('Failed to save');
+                              setBookmarkedPosts((prev) => [...prev, post.id]);
+                            } else {
+                              const res = await fetch(`/api/bookmarks?user_email=${encodeURIComponent(user.email)}&post_id=${encodeURIComponent(post.id)}`, { method: 'DELETE' });
+                              if (!res.ok) throw new Error('Failed to remove');
+                              setBookmarkedPosts((prev) => prev.filter((id) => id !== post.id));
+                            }
+                          } catch (e) {
+                            alert('Failed to update saved posts');
+                          }
+                        }}
+                      >
+                        {bookmarkedPosts.includes(post.id) ? '🔖' : '📑'}
+                      </button>
+
+                      <button
+                        type="button"
+                        aria-label="Share"
+                        title="Share"
+                        className="p-2 rounded-md bg-gray-50 hover:bg-gray-100"
+                        onClick={() => {
+                          try {
+                            const url = `${location.origin}/mood-feed#${post.id}`;
+                            navigator.clipboard.writeText(url);
+                            alert('Link copied to clipboard');
+                          } catch (e) {
+                            alert('Could not copy link');
+                          }
+                        }}
+                      >
+                        📤
                       </button>
                     </>
                   )}

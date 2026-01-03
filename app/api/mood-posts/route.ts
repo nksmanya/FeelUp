@@ -89,6 +89,8 @@ export async function POST(req: Request) {
       owner_email,
       image_base64,
       image_name,
+      image_url,
+      reposted_from,
     } = body || {};
 
     if (!content || typeof content !== "string") {
@@ -100,6 +102,7 @@ export async function POST(req: Request) {
       id: Date.now().toString(),
       content: content.trim(),
       image_url: null as string | null,
+      reposted_from: reposted_from || null,
       mood: mood || null,
       mood_emoji: mood_emoji || null,
       mood_color: mood_color || null,
@@ -134,6 +137,11 @@ export async function POST(req: Request) {
       } catch (e) {
         console.error("Cloudinary upload failed:", e);
       }
+    }
+
+    // If client provided an existing image_url (e.g., reposting), prefer that
+    if (!newPost.image_url && image_url) {
+      newPost.image_url = image_url;
     }
 
     allPosts.push(newPost);
