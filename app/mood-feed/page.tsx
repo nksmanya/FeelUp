@@ -371,31 +371,7 @@ export default function MoodFeedPage() {
               maxLength={500}
             />
 
-            <div className="text-sm">
-              <button
-                type="button"
-                className="btn-secondary rounded px-3 py-2"
-                onClick={() => imageInputRef.current?.click()}
-              >
-                + Add image (optional)
-              </button>
-              <input
-                ref={imageInputRef}
-                type="file"
-                name="image"
-                accept="image/*"
-                className="hidden"
-                onChange={(ev) => {
-                  const f = (ev.target as HTMLInputElement).files?.[0] || null;
-                  setImageFile(f);
-                  if (f) setImagePreview(URL.createObjectURL(f));
-                  else {
-                    if (imagePreview) URL.revokeObjectURL(imagePreview);
-                    setImagePreview(null);
-                  }
-                }}
-              />
-            </div>
+            {/* image input is triggered by icon next to Share button */}
 
             {imagePreview && (
               <div className="flex items-start gap-2 mt-2">
@@ -466,12 +442,43 @@ export default function MoodFeedPage() {
                 <span className="text-sm">Post anonymously</span>
               </label>
 
-              <button
-                type="submit"
-                className="ml-auto btn-primary rounded-xl px-6 py-2"
-              >
-                Share ✨
-              </button>
+              <div className="ml-auto flex items-center gap-2">
+                <button
+                  type="button"
+                    aria-label="Add image"
+                    className="p-2 rounded-md bg-blue-500 text-white hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-300"
+                    onClick={() => imageInputRef.current?.click()}
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-white" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+                    <rect x="3" y="4" width="18" height="16" rx="2" ry="2" />
+                    <circle cx="16" cy="8" r="2" />
+                    <polyline points="21 15 16 10 11 15 3 8" />
+                  </svg>
+                </button>
+                <input
+                  ref={imageInputRef}
+                  type="file"
+                  name="image"
+                  accept="image/*"
+                  className="hidden"
+                  onChange={(ev) => {
+                    const f = (ev.target as HTMLInputElement).files?.[0] || null;
+                    setImageFile(f);
+                    if (f) setImagePreview(URL.createObjectURL(f));
+                    else {
+                      if (imagePreview) URL.revokeObjectURL(imagePreview);
+                      setImagePreview(null);
+                    }
+                  }}
+                />
+
+                <button
+                  type="submit"
+                  className="btn-primary rounded-xl px-6 py-2"
+                >
+                  Share ✨
+                </button>
+              </div>
             </div>
             </form>
           )}
