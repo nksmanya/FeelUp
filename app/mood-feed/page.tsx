@@ -505,7 +505,7 @@ export default function MoodFeedPage() {
           {posts.map((post: any) => (
             <article
                 key={post.id}
-                className="max-w-2xl mx-auto rounded-xl bg-white p-6 soft-glow"
+                className="surface-card p-4 mb-4 max-w-2xl mx-auto w-full"
               >
               <div className="flex items-start gap-3 mb-3">
                 <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-sm">
@@ -587,12 +587,14 @@ export default function MoodFeedPage() {
                     </div>
                   </div>
                 ) : (
-                  post.content
+                  <div className="prose max-w-none text-gray-800">
+                    {post.content}
+                  </div>
                 )}
               </div>
               {post.image_url && (
-                <div className="mt-4">
-                  <img src={post.image_url} alt="post image" className="w-full rounded" />
+                <div className="mt-4 overflow-hidden rounded">
+                  <img src={post.image_url} alt="post image" className="w-full rounded object-cover max-h-96" />
                 </div>
               )}
 
