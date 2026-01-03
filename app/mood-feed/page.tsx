@@ -50,6 +50,8 @@ export default function MoodFeedPage() {
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const [composerOpen, setComposerOpen] = useState<boolean>(false);
+  const [editPostId, setEditPostId] = useState<string | null>(null);
+  const [editContent, setEditContent] = useState<string>("");
 
   function timeAgo(date?: string) {
     if (!date) return "";
@@ -431,11 +433,10 @@ export default function MoodFeedPage() {
             </div>
 
             <div className="flex flex-wrap gap-4 items-center">
-              <select name="visibility" className="input-field w-40">
-                <option value="public">🌍 Public</option>
-                <option value="friends">👥 Friends</option>
-                <option value="anonymous">🔒 Anonymous</option>
-              </select>
+              <div className="flex items-center gap-2">
+                <input type="hidden" name="visibility" value="public" />
+                <div className="px-3 py-1 rounded-full bg-blue-50 text-blue-700 text-sm">🌍 Public</div>
+              </div>
 
               <label className="flex items-center gap-2">
                 <input type="checkbox" name="anonymous" />
@@ -531,11 +532,96 @@ export default function MoodFeedPage() {
               </div>
 
               <div className="mb-4 text-gray-800 leading-relaxed">
-                {post.content}
+                {editPostId === post.id ? (
+                  <div className="grid gap-2">
+                    <textarea
+                      className="input-field h-24"
+                      value={editContent}
+                      onChange={(e) => setEditContent(e.target.value)}
+                    />
+                    <div className="flex gap-2">
+                      <button
+                        className="px-4 py-2 bg-green-500 text-white rounded-lg"
+                        onClick={async () => {
+                          // save edit
+                          try {
+                            const res = await fetch(`/api/mood-posts?id=${encodeURIComponent(post.id)}`, {
+                              method: "PATCH",
+                              headers: { "Content-Type": "application/json" },
+                              body: JSON.stringify({ content: editContent, owner_email: user?.email }),
+                            });
+                            if (!res.ok) {
+                              const err = await res.json();
+                              alert(err?.error || "Failed to update post");
+                              return;
+                            }
+                            setEditPostId(null);
+                            setEditContent("");
+                            await loadPosts();
+                          } catch (e) {
+                            alert("Failed to update post");
+                          }
+                        }}
+                      >
+                        Save
+                      </button>
+                      <button
+                        className="px-4 py-2 bg-gray-200 rounded-lg"
+                        onClick={() => {
+                          setEditPostId(null);
+                          setEditContent("");
+                        }}
+                      >
+                        Cancel
+                      </button>
+                    </div>
+                  </div>
+                ) : (
+                  post.content
+                )}
               </div>
               {post.image_url && (
                 <div className="mt-4">
                   <img src={post.image_url} alt="post image" className="w-full rounded" />
+                </div>
+              )}
+
+              {/* Owner actions: Edit / Delete */}
+              {!post.anonymous && user?.email && post.owner_email === user.email && (
+                <div className="flex gap-2 mt-3">
+                  <button
+                    type="button"
+                    className="text-xs px-2 py-1 bg-gray-100 rounded"
+                    onClick={() => {
+                      setEditPostId(post.id);
+                      setEditContent(post.content || "");
+                      // scroll into view maybe
+                    }}
+                  >
+                    Edit
+                  </button>
+                  <button
+                    type="button"
+                    className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded"
+                    onClick={async () => {
+                      if (!confirm("Delete this post?")) return;
+                      try {
+                        const res = await fetch(`/api/mood-posts?id=${encodeURIComponent(post.id)}&owner_email=${encodeURIComponent(user.email)}`, {
+                          method: "DELETE",
+                        });
+                        if (!res.ok) {
+                          const err = await res.json();
+                          alert(err?.error || "Failed to delete post");
+                          return;
+                        }
+                        await loadPosts();
+                      } catch (e) {
+                        alert("Failed to delete post");
+                      }
+                    }}
+                  >
+                    Delete
+                  </button>
                 </div>
               )}
 

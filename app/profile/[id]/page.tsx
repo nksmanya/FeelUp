@@ -31,6 +31,7 @@ export default function ProfilePage() {
   const [isFollowing, setIsFollowing] = useState(false);
   const [loading, setLoading] = useState(true);
   const [followLoading, setFollowLoading] = useState(false);
+  const [userPosts, setUserPosts] = useState<any[]>([]);
 
   const userId = params?.id as string;
 
@@ -40,6 +41,12 @@ export default function ProfilePage() {
       checkFollowStatus();
     }
   }, [userId, session]);
+
+  useEffect(() => {
+    if (profile?.email) {
+      loadUserPosts();
+    }
+  }, [profile]);
 
   const loadProfile = async () => {
     try {
@@ -135,6 +142,26 @@ export default function ProfilePage() {
     });
   };
 
+  const timeAgo = (date?: string) => {
+    if (!date) return "";
+    const then = new Date(date).getTime();
+    const now = Date.now();
+    const sec = Math.floor((now - then) / 1000);
+    if (sec < 60) return "just now";
+    const min = Math.floor(sec / 60);
+    if (min < 60) return `${min}m ago`;
+    const hr = Math.floor(min / 60);
+    if (hr < 24) return `${hr}h ago`;
+    const days = Math.floor(hr / 24);
+    if (days < 7) return `${days}d ago`;
+    const weeks = Math.floor(days / 7);
+    if (weeks < 5) return `${weeks}w ago`;
+    const months = Math.floor(days / 30);
+    if (months < 12) return `${months}mo ago`;
+    const years = Math.floor(days / 365);
+    return `${years}y ago`;
+  };
+
   const getAchievementEmoji = (achievement: string) => {
     const emojiMap: { [key: string]: string } = {
       "7-Day Streak": "🔥",
@@ -154,6 +181,19 @@ export default function ProfilePage() {
       "Digital Detox": "📵",
     };
     return emojiMap[achievement] || "🏆";
+  };
+
+  const loadUserPosts = async () => {
+    if (!profile?.email) return;
+    try {
+      const res = await fetch(`/api/mood-posts?owner_email=${encodeURIComponent(profile.email)}&visibility=public&limit=20`);
+      if (res.ok) {
+        const data = await res.json();
+        setUserPosts(data.posts || []);
+      }
+    } catch (e) {
+      console.error("Failed to load user posts", e);
+    }
   };
 
   if (loading) {
@@ -326,42 +366,61 @@ export default function ProfilePage() {
                 </div>
               </div>
             </div>
-
-            {/* Recent Activity (Placeholder) */}
-            <div className="bg-white rounded-xl shadow-sm p-6">
-              <h2 className="text-xl font-semibold text-gray-900 mb-4">
-                Recent Activity
-              </h2>
-              <div className="space-y-4">
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="text-2xl">📝</div>
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      Shared a journal entry
+              {/* Recent Activity (Placeholder) */}
+              <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">
+                  Recent Activity
+                </h2>
+                <div className="space-y-4">
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="text-2xl">📝</div>
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        Shared a journal entry
+                      </div>
+                      <div className="text-sm text-gray-600">2 hours ago</div>
                     </div>
-                    <div className="text-sm text-gray-600">2 hours ago</div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="text-2xl">🎯</div>
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      Completed daily mood check-in
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="text-2xl">🎯</div>
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        Completed daily mood check-in
+                      </div>
+                      <div className="text-sm text-gray-600">1 day ago</div>
                     </div>
-                    <div className="text-sm text-gray-600">1 day ago</div>
                   </div>
-                </div>
-                <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
-                  <div className="text-2xl">🏆</div>
-                  <div>
-                    <div className="font-medium text-gray-900">
-                      Earned new achievement
+                  <div className="flex items-center gap-3 p-3 bg-gray-50 rounded-lg">
+                    <div className="text-2xl">🏆</div>
+                    <div>
+                      <div className="font-medium text-gray-900">
+                        Earned new achievement
+                      </div>
+                      <div className="text-sm text-gray-600">3 days ago</div>
                     </div>
-                    <div className="text-sm text-gray-600">3 days ago</div>
                   </div>
                 </div>
               </div>
-            </div>
+
+              {/* Public Posts by this user */}
+              <div className="bg-white rounded-xl shadow-sm p-6">
+                <h2 className="text-xl font-semibold text-gray-900 mb-4">Public Posts</h2>
+                {userPosts.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">No public posts yet.</div>
+                ) : (
+                  <div className="space-y-4">
+                    {userPosts.map((p) => (
+                      <div key={p.id} className="p-3 bg-gray-50 rounded-lg">
+                        <div className="text-sm text-gray-600 mb-1">{timeAgo(p.created_at)}</div>
+                        <div className="text-gray-800 mb-2">{p.content}</div>
+                        {p.image_url && (
+                          <img src={p.image_url} alt="post" className="w-full rounded" />
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
           </div>
 
           {/* Achievements */}

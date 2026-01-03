@@ -43,15 +43,21 @@ export async function GET(req: Request) {
     const url = new URL(req.url);
     const limit = parseInt(url.searchParams.get("limit") || "20", 10);
     const visibility = url.searchParams.get("visibility") || "public";
+    const owner_email = url.searchParams.get("owner_email");
 
     const allPosts = readPosts();
     let filteredPosts = allPosts;
 
-    // Filter by visibility
-    if (visibility === "public") {
-      filteredPosts = allPosts.filter(
-        (post: any) => post.visibility === "public",
-      );
+    // Filter by visibility or owner
+    if (owner_email) {
+      // If owner_email specified, filter by that owner and then by visibility
+      filteredPosts = allPosts.filter((post: any) => post.owner_email === owner_email);
+      // If caller didn't request other visibility, only show public by default
+      if (visibility === "public") {
+        filteredPosts = filteredPosts.filter((post: any) => post.visibility === "public");
+      }
+    } else if (visibility === "public") {
+      filteredPosts = allPosts.filter((post: any) => post.visibility === "public");
     }
 
     // Sort by created_at descending and limit
@@ -79,7 +85,6 @@ export async function POST(req: Request) {
       mood,
       mood_emoji,
       mood_color,
-      visibility = "public",
       anonymous,
       owner_email,
       image_base64,
@@ -98,7 +103,8 @@ export async function POST(req: Request) {
       mood: mood || null,
       mood_emoji: mood_emoji || null,
       mood_color: mood_color || null,
-      visibility: visibility || "public",
+      // Force mood-feed posts to be publicly visible for the community
+      visibility: "public",
       anonymous: !!anonymous,
       owner_email: anonymous ? null : owner_email || null,
       created_at: new Date().toISOString(),
@@ -141,5 +147,67 @@ export async function POST(req: Request) {
       { error: err?.message || String(err) },
       { status: 500 },
     );
+  }
+}
+
+export async function PATCH(req: Request) {
+  try {
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
+    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+    const body = await req.json();
+    const { content, mood, mood_emoji, mood_color, owner_email } = body || {};
+
+    const allPosts = readPosts();
+    const idx = allPosts.findIndex((p: any) => p.id === id);
+    if (idx === -1) return NextResponse.json({ error: "Post not found" }, { status: 404 });
+
+    const post = allPosts[idx];
+    // Basic ownership check: only allow update if owner_email matches and post is not anonymous
+    if (post.anonymous || !owner_email || post.owner_email !== owner_email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    if (typeof content === "string") post.content = content.trim();
+    if (mood) post.mood = mood;
+    if (mood_emoji) post.mood_emoji = mood_emoji;
+    if (mood_color) post.mood_color = mood_color;
+    post.updated_at = new Date().toISOString();
+
+    allPosts[idx] = post;
+    writePosts(allPosts);
+
+    return NextResponse.json({ post });
+  } catch (err: any) {
+    console.error("Mood posts PATCH error:", err);
+    return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
+  }
+}
+
+export async function DELETE(req: Request) {
+  try {
+    const url = new URL(req.url);
+    const id = url.searchParams.get("id");
+    const owner_email = url.searchParams.get("owner_email");
+    if (!id) return NextResponse.json({ error: "Missing id" }, { status: 400 });
+
+    const allPosts = readPosts();
+    const idx = allPosts.findIndex((p: any) => p.id === id);
+    if (idx === -1) return NextResponse.json({ error: "Post not found" }, { status: 404 });
+
+    const post = allPosts[idx];
+    if (post.anonymous || !owner_email || post.owner_email !== owner_email) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 403 });
+    }
+
+    // Remove post
+    allPosts.splice(idx, 1);
+    writePosts(allPosts);
+
+    return NextResponse.json({ success: true });
+  } catch (err: any) {
+    console.error("Mood posts DELETE error:", err);
+    return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
   }
 }
