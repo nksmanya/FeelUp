@@ -586,44 +586,7 @@ export default function MoodFeedPage() {
                 </div>
               )}
 
-              {/* Owner actions: Edit / Delete */}
-              {!post.anonymous && user?.email && post.owner_email === user.email && (
-                <div className="flex gap-2 mt-3">
-                  <button
-                    type="button"
-                    className="text-xs px-2 py-1 bg-gray-100 rounded"
-                    onClick={() => {
-                      setEditPostId(post.id);
-                      setEditContent(post.content || "");
-                      // scroll into view maybe
-                    }}
-                  >
-                    Edit
-                  </button>
-                  <button
-                    type="button"
-                    className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded"
-                    onClick={async () => {
-                      if (!confirm("Delete this post?")) return;
-                      try {
-                        const res = await fetch(`/api/mood-posts?id=${encodeURIComponent(post.id)}&owner_email=${encodeURIComponent(user.email)}`, {
-                          method: "DELETE",
-                        });
-                        if (!res.ok) {
-                          const err = await res.json();
-                          alert(err?.error || "Failed to delete post");
-                          return;
-                        }
-                        await loadPosts();
-                      } catch (e) {
-                        alert("Failed to delete post");
-                      }
-                    }}
-                  >
-                    Delete
-                  </button>
-                </div>
-              )}
+              
 
               {/* Reaction Buttons */}
               <div className="flex gap-2 pt-2 border-t border-gray-100">
@@ -633,15 +596,16 @@ export default function MoodFeedPage() {
                   return (
                     <button
                       key={reaction.type}
-                      className={`flex items-center gap-1 px-3 py-1 rounded-full text-sm transition-colors ${
+                      aria-label={reaction.label}
+                      title={reaction.label}
+                      className={`flex items-center gap-2 px-3 py-1 rounded-full text-sm transition-colors ${
                         count > 0
                           ? "bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100"
                           : "bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
                       }`}
                       onClick={() => handleReaction(post.id, reaction.type)}
                     >
-                      <span>{reaction.emoji}</span>
-                      <span>{reaction.label}</span>
+                      <span className="text-lg">{reaction.emoji}</span>
                       {count > 0 && (
                         <span className="font-medium">({count})</span>
                       )}
@@ -649,28 +613,66 @@ export default function MoodFeedPage() {
                   );
                 })}
 
-                {/* Comment Toggle Button */}
-                <button
-                  className="flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100 ml-auto"
-                  onClick={() => {
-                    const isCurrentlyShowing = showComments[post.id];
-                    setShowComments((prev) => ({
-                      ...prev,
-                      [post.id]: !isCurrentlyShowing,
-                    }));
-                    if (!isCurrentlyShowing && !postComments[post.id]) {
-                      loadPostComments(post.id);
-                    }
-                  }}
-                >
-                  <span>💬</span>
-                  <span>Comments</span>
-                  {(postComments[post.id]?.length || 0) > 0 && (
-                    <span className="font-medium">
-                      ({postComments[post.id].length})
-                    </span>
+                <div className="ml-auto flex items-center gap-2">
+                  {/* Owner Edit/Delete (right-aligned with comments) */}
+                  {!post.anonymous && user?.email && post.owner_email === user.email && (
+                    <>
+                      <button
+                        type="button"
+                        className="text-xs px-2 py-1 bg-gray-100 rounded"
+                        onClick={() => {
+                          setEditPostId(post.id);
+                          setEditContent(post.content || "");
+                        }}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        className="text-xs px-2 py-1 bg-red-100 text-red-700 rounded"
+                        onClick={async () => {
+                          if (!confirm("Delete this post?")) return;
+                          try {
+                            const res = await fetch(`/api/mood-posts?id=${encodeURIComponent(post.id)}&owner_email=${encodeURIComponent(user.email)}`, {
+                              method: "DELETE",
+                            });
+                            if (!res.ok) {
+                              const err = await res.json();
+                              alert(err?.error || "Failed to delete post");
+                              return;
+                            }
+                            await loadPosts();
+                          } catch (e) {
+                            alert("Failed to delete post");
+                          }
+                        }}
+                      >
+                        Delete
+                      </button>
+                    </>
                   )}
-                </button>
+
+                  {/* Comment Toggle Button */}
+                  <button
+                    className="flex items-center gap-1 px-3 py-1 rounded-full text-sm bg-gray-50 text-gray-600 border border-gray-200 hover:bg-gray-100"
+                    onClick={() => {
+                      const isCurrentlyShowing = showComments[post.id];
+                      setShowComments((prev) => ({
+                        ...prev,
+                        [post.id]: !isCurrentlyShowing,
+                      }));
+                      if (!isCurrentlyShowing && !postComments[post.id]) {
+                        loadPostComments(post.id);
+                      }
+                    }}
+                  >
+                    <span>💬</span>
+                    <span className="sr-only">Comments</span>
+                    {(postComments[post.id]?.length || 0) > 0 && (
+                      <span className="font-medium">({postComments[post.id].length})</span>
+                    )}
+                  </button>
+                </div>
               </div>
 
               {/* Comments Section */}
