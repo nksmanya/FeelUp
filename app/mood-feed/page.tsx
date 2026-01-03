@@ -303,16 +303,19 @@ export default function MoodFeedPage() {
           <h1 className="text-3xl font-bold text-gray-900 mb-2">✨ Mood Feed</h1>
         </div>
 
-        <section className="mb-8 bg-white rounded-xl p-6 shadow-sm">
+        <section className="mb-8">
           {!composerOpen ? (
-            <div
-              className="flex items-center gap-3 p-3 rounded-full border border-gray-200 hover:shadow-sm cursor-pointer"
-              onClick={() => setComposerOpen(true)}
-            >
-              <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white">🙂</div>
-              <div className="flex-1 text-gray-600">Start a post</div>
+            <div className="surface-card p-4 mb-4 max-w-2xl mx-auto w-full">
+              <div
+                className="flex items-center gap-3 p-3 rounded-full border border-gray-200 hover:shadow-sm cursor-pointer"
+                onClick={() => setComposerOpen(true)}
+              >
+                <div className="w-10 h-10 rounded-full bg-gray-300 flex items-center justify-center text-white">🙂</div>
+                <div className="flex-1 text-gray-600">Start a post</div>
+              </div>
             </div>
           ) : (
+            <div className="surface-card p-4 mb-4 max-w-2xl mx-auto w-full">
             <form
             onSubmit={async (e) => {
               e.preventDefault();
@@ -378,7 +381,7 @@ export default function MoodFeedPage() {
           >
             <textarea
               name="content"
-              className="input-field h-28 resize-none"
+              className="input-field h-40 resize-none w-full"
               placeholder="How are you feeling? Share your thoughts..."
               maxLength={500}
             />
@@ -492,6 +495,7 @@ export default function MoodFeedPage() {
               </div>
             </div>
             </form>
+            </div>
           )}
         </section>
 
@@ -593,8 +597,8 @@ export default function MoodFeedPage() {
                 )}
               </div>
               {post.image_url && (
-                <div className="mt-4 overflow-hidden rounded">
-                  <img src={post.image_url} alt="post image" className="w-full rounded object-cover max-h-96" />
+                <div className="mt-4 overflow-hidden rounded bg-gray-50 p-3 flex items-center justify-center">
+                  <img src={post.image_url} alt="post image" className="w-full rounded object-contain max-h-[720px]" />
                 </div>
               )}
 
