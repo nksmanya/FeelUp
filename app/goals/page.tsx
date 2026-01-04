@@ -72,6 +72,64 @@ export default function GoalsPage() {
     [user?.email, selectedDate],
   );
 
+  // Edit/Delete state and handlers
+  const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
+  const [editGoalData, setEditGoalData] = useState<any>(null);
+
+  const startEditing = (goal: any) => {
+    setEditingGoalId(goal.id);
+    setEditGoalData({ title: goal.title || "", description: goal.description || "", category: goal.category || "personal" });
+  };
+
+  const cancelEditing = () => {
+    setEditingGoalId(null);
+    setEditGoalData(null);
+  };
+
+  const saveEdit = async (goalId: string) => {
+    try {
+      const res = await fetch("/api/goals", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          goal_id: goalId,
+          user_email: user.email,
+          title: editGoalData.title,
+          description: editGoalData.description,
+          category: editGoalData.category,
+        }),
+      });
+      if (res.ok) {
+        cancelEditing();
+        await loadGoals();
+      } else {
+        const err = await res.json();
+        alert(err?.error || "Failed to save goal");
+      }
+    } catch (e) {
+      alert("Failed to save goal");
+    }
+  };
+
+  const deleteGoal = async (goalId: string) => {
+    if (!confirm("Delete this goal?")) return;
+    try {
+      const res = await fetch(`/api/goals?goal_id=${encodeURIComponent(goalId)}&user_email=${encodeURIComponent(user.email)}`, {
+        method: "DELETE",
+      });
+      if (res.ok) {
+        // close edit if deleting
+        if (editingGoalId === goalId) cancelEditing();
+        await loadGoals();
+      } else {
+        const err = await res.json();
+        alert(err?.error || "Failed to delete goal");
+      }
+    } catch (e) {
+      alert("Failed to delete goal");
+    }
+  };
+
   const changeDateBy = async (days: number) => {
     const cur = selectedDate ? new Date(selectedDate) : new Date();
     cur.setDate(cur.getDate() + days);
@@ -450,13 +508,52 @@ export default function GoalsPage() {
                         </div>
                       </div>
 
-                      <button
-                        onClick={() => setCompletingGoal(goal)}
-                        aria-label={`Complete ${goal.title}`}
-                        className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-emerald-50"
-                      >
-                        ○
-                      </button>
+                      {editingGoalId === goal.id ? (
+                        <div className="flex gap-2">
+                          <input
+                            type="text"
+                            value={editGoalData?.title || ""}
+                            onChange={(e) => setEditGoalData({ ...editGoalData, title: e.target.value })}
+                            className="input-field"
+                          />
+                          <button
+                            onClick={() => saveEdit(goal.id)}
+                            className="px-3 py-2 bg-green-500 text-white rounded-lg"
+                          >
+                            Save
+                          </button>
+                          <button
+                            onClick={cancelEditing}
+                            className="px-3 py-2 bg-gray-200 rounded-lg"
+                          >
+                            Cancel
+                          </button>
+                        </div>
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={() => setCompletingGoal(goal)}
+                            aria-label={`Complete ${goal.title}`}
+                            className="w-10 h-10 rounded-full border border-gray-200 flex items-center justify-center text-gray-600 hover:bg-emerald-50"
+                          >
+                            ○
+                          </button>
+                          <button
+                            onClick={() => startEditing(goal)}
+                            aria-label={`Edit ${goal.title}`}
+                            className="px-3 py-2 bg-yellow-100 rounded-lg"
+                          >
+                            Edit
+                          </button>
+                          <button
+                            onClick={() => deleteGoal(goal.id)}
+                            aria-label={`Delete ${goal.title}`}
+                            className="px-3 py-2 bg-red-100 rounded-lg"
+                          >
+                            Delete
+                          </button>
+                        </div>
+                      )}
                     </div>
                   );
                 })}
@@ -510,9 +607,45 @@ export default function GoalsPage() {
                         </div>
                       </div>
 
-                      <div className="text-xs text-gray-500">
-                        Completed:{" "}
-                        {new Date(goal.completed_at).toLocaleString()}
+                      <div className="flex items-center gap-3">
+                        <div className="text-xs text-gray-500">
+                          Completed: {" "}
+                          {new Date(goal.completed_at).toLocaleString()}
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <button
+                            onClick={async () => {
+                              // undo completion
+                              try {
+                                const res = await fetch("/api/goals", {
+                                  method: "PATCH",
+                                  headers: { "Content-Type": "application/json" },
+                                  body: JSON.stringify({
+                                    goal_id: goal.id,
+                                    user_email: user.email,
+                                    completed: false,
+                                  }),
+                                });
+                                if (!res.ok) {
+                                  const err = await res.json();
+                                  return alert(err?.error || "Failed to undo completion");
+                                }
+                                await loadGoals();
+                              } catch (e) {
+                                alert("Failed to undo completion");
+                              }
+                            }}
+                            className="px-3 py-2 bg-yellow-100 rounded-lg text-xs"
+                          >
+                            Undo
+                          </button>
+                          <button
+                            onClick={() => deleteGoal(goal.id)}
+                            className="px-3 py-2 bg-red-100 rounded-lg text-xs"
+                          >
+                            Delete
+                          </button>
+                        </div>
                       </div>
                     </div>
                   );

@@ -213,3 +213,49 @@ export async function PATCH(req: Request) {
     );
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const url = new URL(req.url);
+    const goal_id = url.searchParams.get("goal_id");
+    const user_email = url.searchParams.get("user_email");
+
+    if (!goal_id || !user_email) {
+      return NextResponse.json(
+        { error: "Goal ID and user email required" },
+        { status: 400 },
+      );
+    }
+
+    const supabase = createServerSupabaseClient();
+
+    // Get user profile
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", user_email)
+      .single();
+
+    if (!profile) {
+      return NextResponse.json({ error: "User not found" }, { status: 404 });
+    }
+
+    // Delete the goal owned by the user
+    const { error } = await supabase
+      .from("daily_goals")
+      .delete()
+      .eq("id", goal_id)
+      .eq("user_id", profile.id);
+
+    if (error) {
+      return NextResponse.json({ error: "Failed to delete goal" }, { status: 500 });
+    }
+
+    return NextResponse.json({ ok: true });
+  } catch (err: any) {
+    return NextResponse.json(
+      { error: err?.message || String(err) },
+      { status: 500 },
+    );
+  }
+}
