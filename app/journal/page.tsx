@@ -6,7 +6,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import StreakDisplay from "../../components/StreakDisplay";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
-import { BookOpen, Heart, Image as ImageIcon, Share2 } from "lucide-react";
+import { BookOpen, Heart, Image as ImageIcon, Share2, Plus, X } from "lucide-react";
 
 // Enhanced mood options with emojis and colors
 const moodOptions = [
@@ -61,8 +61,8 @@ export default function JournalPage() {
   const [user, setUser] = useState<any>(null);
   const [entries, setEntries] = useState<any[]>([]);
   const [gratitudeEntries, setGratitudeEntries] = useState<any[]>([]);
-  const [showNewEntry, setShowNewEntry] = useState(false);
-  const [showGratitude, setShowGratitude] = useState(false);
+  const [showAddMenu, setShowAddMenu] = useState(false);
+  const [entryType, setEntryType] = useState<"journal" | "gratitude" | null>(null);
   const [selectedMood, setSelectedMood] = useState<any>(null);
   const [energyLevel, setEnergyLevel] = useState<number | null>(null);
   const [selectedTags, setSelectedTags] = useState<string[]>([]);
@@ -156,8 +156,7 @@ export default function JournalPage() {
 
       if (res.ok) {
         form.reset();
-        setShowNewEntry(false);
-        setShowGratitude(false);
+        setEntryType(null);
         setSelectedMood(null);
         setEnergyLevel(null);
         setSelectedTags([]);
@@ -297,57 +296,113 @@ export default function JournalPage() {
         <div className="flex gap-4 mb-6">
           <button
             onClick={() => setActiveTab("journal")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
               activeTab === "journal"
                 ? "bg-blue-500 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
-            📝 Journal ({entries.length})
+            <BookOpen className="w-4 h-4" />
+            Journal ({entries.length})
           </button>
           <button
             onClick={() => setActiveTab("gratitude")}
-            className={`px-4 py-2 rounded-lg font-medium transition-colors ${
+            className={`px-4 py-2 rounded-lg font-medium transition-colors flex items-center gap-2 ${
               activeTab === "gratitude"
                 ? "bg-green-500 text-white"
                 : "bg-gray-100 text-gray-700 hover:bg-gray-200"
             }`}
           >
-            🙏 Gratitude ({gratitudeEntries.length})
+            <Heart className="w-4 h-4" />
+            Gratitude ({gratitudeEntries.length})
           </button>
         </div>
 
-        {/* Add Entry Buttons */}
-        <div className="flex gap-3 mb-8">
-          {!showNewEntry && !showGratitude && (
-            <>
+        {/* Add Entry Button */}
+        <div className="mb-8">
+          {!entryType && (
+            <div className="relative">
               <button
-                onClick={() => setShowNewEntry(true)}
-                className="btn-primary rounded-xl px-6 py-3"
+                onClick={() => setShowAddMenu(!showAddMenu)}
+                className="btn-primary rounded-xl px-6 py-3 flex items-center gap-2"
               >
-                + New Entry
+                <Plus className="w-5 h-5" />
+                Add Entry
               </button>
-              <button
-                onClick={() => setShowGratitude(true)}
-                className="bg-green-500 hover:bg-green-600 text-white rounded-xl px-6 py-3 transition-colors"
-              >
-                + Gratitude Note
-              </button>
-            </>
+              
+              {/* Dropdown Menu */}
+              {showAddMenu && (
+                <div className="absolute top-full left-0 mt-2 bg-white rounded-xl shadow-lg border border-gray-200 py-2 z-10 min-w-[200px]">
+                  <button
+                    onClick={() => {
+                      setEntryType("journal");
+                      setShowAddMenu(false);
+                    }}
+                    className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 transition-colors"
+                  >
+                    <BookOpen className="w-5 h-5 text-blue-500" />
+                    <div>
+                      <div className="font-medium text-gray-900">Journal Entry</div>
+                      <div className="text-sm text-gray-500">Write your thoughts and reflections</div>
+                    </div>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setEntryType("gratitude");
+                      setShowAddMenu(false);
+                    }}
+                    className="w-full px-4 py-3 text-left hover:bg-gray-50 flex items-center gap-3 transition-colors border-t border-gray-100"
+                  >
+                    <Heart className="w-5 h-5 text-green-500" />
+                    <div>
+                      <div className="font-medium text-gray-900">Gratitude Note</div>
+                      <div className="text-sm text-gray-500">Express what you're grateful for</div>
+                    </div>
+                  </button>
+                </div>
+              )}
+            </div>
           )}
         </div>
 
         {/* New Journal Entry Form */}
-        {(showNewEntry || showGratitude) && (
+        {entryType && (
           <div className="bg-white rounded-xl p-6 soft-glow mb-8">
-            <h3 className="text-lg font-semibold mb-4">
-              {showGratitude ? "🙏 New Gratitude Note" : "📝 New Journal Entry"}
-            </h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold flex items-center gap-2">
+                {entryType === "gratitude" ? (
+                  <>
+                    <Heart className="w-5 h-5 text-green-500" />
+                    New Gratitude Note
+                  </>
+                ) : (
+                  <>
+                    <BookOpen className="w-5 h-5 text-blue-500" />
+                    New Journal Entry
+                  </>
+                )}
+              </h3>
+              <button
+                onClick={() => {
+                  setEntryType(null);
+                  setSelectedMood(null);
+                  setEnergyLevel(null);
+                  setSelectedTags([]);
+                  setImageFile(null);
+                  setImagePreview(null);
+                  setCanConvertToPost(false);
+                }}
+                className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                aria-label="Close form"
+              >
+                <X className="w-5 h-5 text-gray-500" />
+              </button>
+            </div>
             <form
-              onSubmit={(e) => addEntry(e, showGratitude)}
+              onSubmit={(e) => addEntry(e, entryType === "gratitude")}
               className="grid gap-4"
             >
-              {!showGratitude && (
+              {entryType === "journal" && (
                 <input
                   type="text"
                   name="title"
@@ -359,7 +414,7 @@ export default function JournalPage() {
               <textarea
                 name="content"
                 placeholder={
-                  showGratitude
+                  entryType === "gratitude"
                     ? "What are you grateful for today?"
                     : "Write your thoughts, feelings, or reflections..."
                 }
