@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import { Lock } from "lucide-react";
 
 const achievementCategories = [
   {
@@ -266,7 +267,7 @@ export default function AchievementsPage() {
         {/* Header */}
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-3 mb-4">
-            <Trophy className="w-10 h-10 text-yellow-500" />
+            <span className="w-10 h-10 text-yellow-500 text-3xl inline-flex items-center justify-center">🏆</span>
             <h1 className="text-4xl font-bold text-gray-900">
               Achievements
             </h1>
