@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import { Calendar, Heart, BookOpen, Users, Dumbbell, Star, Plus, Check, Clock, MapPin, User, BarChart3 } from "lucide-react";
 
 interface Event {
   id: string;
@@ -153,29 +154,29 @@ export default function EventsPage() {
   const [rsvpEvents, setRsvpEvents] = useState<Set<string>>(new Set());
 
   const categories = [
-    { id: "all", label: "All Events", icon: "🌟", count: events.length },
+    { id: "all", label: "All Events", icon: Star, count: events.length },
     {
       id: "wellness",
       label: "Wellness",
-      icon: "🧘",
+      icon: Heart,
       count: events.filter((e) => e.category === "wellness").length,
     },
     {
       id: "study",
       label: "Study Groups",
-      icon: "📚",
+      icon: BookOpen,
       count: events.filter((e) => e.category === "study").length,
     },
     {
       id: "social",
       label: "Social",
-      icon: "🎉",
+      icon: Users,
       count: events.filter((e) => e.category === "social").length,
     },
     {
       id: "fitness",
       label: "Fitness",
-      icon: "💪",
+      icon: Dumbbell,
       count: events.filter((e) => e.category === "fitness").length,
     },
   ];
@@ -329,9 +330,10 @@ export default function EventsPage() {
           {session && (
             <button
               onClick={() => setShowCreateForm(true)}
-              className="btn-primary px-6 py-3 rounded-lg text-white font-medium hover:bg-purple-700 transition-colors"
+              className="btn-primary px-6 py-3 rounded-lg text-white font-medium hover:bg-purple-700 transition-colors flex items-center gap-2 mx-auto"
             >
-              ➕ Create Event
+              <Plus className="w-5 h-5" />
+              Create Event
             </button>
           )}
         </div>
@@ -363,11 +365,14 @@ export default function EventsPage() {
                 onChange={(e) => setSelectedCategory(e.target.value)}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
               >
-                {categories.map((category) => (
-                  <option key={category.id} value={category.id}>
-                    {category.icon} {category.label} ({category.count})
-                  </option>
-                ))}
+                {categories.map((category) => {
+                  const IconComponent = category.icon;
+                  return (
+                    <option key={category.id} value={category.id}>
+                      {category.label} ({category.count})
+                    </option>
+                  );
+                })}
               </select>
             </div>
 
@@ -392,22 +397,26 @@ export default function EventsPage() {
 
         {/* Category Pills */}
         <div className="flex flex-wrap gap-3 mb-8">
-          {categories.map((category) => (
-            <button
-              key={category.id}
-              onClick={() => setSelectedCategory(category.id)}
-              className={`px-4 py-2 rounded-full font-medium transition-colors ${
-                selectedCategory === category.id
-                  ? "bg-purple-600 text-white"
-                  : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
-              }`}
-            >
-              {category.icon} {category.label}
-              <span className="ml-2 text-sm opacity-75">
-                ({category.count})
-              </span>
-            </button>
-          ))}
+          {categories.map((category) => {
+            const IconComponent = category.icon;
+            return (
+              <button
+                key={category.id}
+                onClick={() => setSelectedCategory(category.id)}
+                className={`px-4 py-2 rounded-full font-medium transition-colors flex items-center gap-2 ${
+                  selectedCategory === category.id
+                    ? "bg-purple-600 text-white"
+                    : "bg-white text-gray-700 hover:bg-gray-50 border border-gray-200"
+                }`}
+              >
+                <IconComponent className="w-4 h-4" />
+                {category.label}
+                <span className="text-sm opacity-75">
+                  ({category.count})
+                </span>
+              </button>
+            );
+          })}
         </div>
 
         {/* Events Grid */}
@@ -448,25 +457,29 @@ export default function EventsPage() {
                 {/* Event Details */}
                 <div className="space-y-2 text-sm text-gray-500">
                   <div className="flex items-center gap-2">
-                    <span>📅</span>
+                    <Calendar className="w-4 h-4" />
                     <span>
                       {formatDate(event.date)} at {formatTime(event.time)}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>⏱️</span>
+                    <Clock className="w-4 h-4" />
                     <span>{event.duration}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>{event.isVirtual ? "💻" : "📍"}</span>
+                    {event.isVirtual ? (
+                      <Users className="w-4 h-4" />
+                    ) : (
+                      <MapPin className="w-4 h-4" />
+                    )}
                     <span className="line-clamp-1">{event.location}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>{event.organizerAvatar}</span>
+                    <User className="w-4 h-4" />
                     <span>by {event.organizer}</span>
                   </div>
                   <div className="flex items-center gap-2">
-                    <span>👥</span>
+                    <Users className="w-4 h-4" />
                     <span>
                       {event.attendees} attending
                       {event.maxAttendees &&
@@ -576,8 +589,9 @@ export default function EventsPage() {
 
         {/* Upcoming Events Summary */}
         <div className="bg-white rounded-xl p-8 shadow-sm">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            📊 Event Summary
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <BarChart3 className="w-6 h-6" />
+            Event Summary
           </h2>
           <div className="grid grid-cols-2 md:grid-cols-4 gap-6">
             <div className="text-center">

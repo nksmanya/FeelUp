@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useSession } from "next-auth/react";
 import Navbar from "../../../components/Navbar";
+import { MapPin, Flame, BookOpen, Users, Trophy, ArrowLeft, MessageCircle } from "lucide-react";
 
 interface UserProfile {
   id: string;
@@ -283,7 +284,8 @@ export default function ProfilePage() {
                     {profile.name}
                   </h1>
                   <p className="text-gray-600 flex items-center gap-2 mt-1">
-                    📍 {profile.location}
+                    <MapPin className="w-4 h-4" />
+                    {profile.location}
                   </p>
                   <p className="text-sm text-gray-500 mt-1">
                     Member since {formatDate(profile.joined_date)}
@@ -357,35 +359,35 @@ export default function ProfilePage() {
 
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="text-center p-4 bg-orange-50 rounded-lg">
+                  <Flame className="w-6 h-6 text-orange-600 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-orange-600">
                     {profile.mood_streak}
                   </div>
                   <div className="text-sm text-gray-600">Day Streak</div>
-                  <div className="text-lg mt-1">🔥</div>
                 </div>
 
                 <div className="text-center p-4 bg-blue-50 rounded-lg">
+                  <BookOpen className="w-6 h-6 text-blue-600 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-blue-600">
                     {profile.journal_entries}
                   </div>
                   <div className="text-sm text-gray-600">Journal Entries</div>
-                  <div className="text-lg mt-1">📝</div>
                 </div>
 
                 <div className="text-center p-4 bg-green-50 rounded-lg">
+                  <Users className="w-6 h-6 text-green-600 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-green-600">
                     {profile.followers_count}
                   </div>
                   <div className="text-sm text-gray-600">Followers</div>
-                  <div className="text-lg mt-1">👥</div>
                 </div>
 
                 <div className="text-center p-4 bg-purple-50 rounded-lg">
+                  <Users className="w-6 h-6 text-purple-600 mx-auto mb-2" />
                   <div className="text-2xl font-bold text-purple-600">
                     {profile.following_count}
                   </div>
                   <div className="text-sm text-gray-600">Following</div>
-                  <div className="text-lg mt-1">🌟</div>
                 </div>
               </div>
             </div>
@@ -508,9 +510,10 @@ export default function ProfilePage() {
         <div className="mt-8 flex justify-center">
           <button
             onClick={() => router.push("/mood-feed")}
-            className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors"
+            className="px-6 py-3 bg-gray-600 text-white rounded-lg hover:bg-gray-700 transition-colors flex items-center gap-2"
           >
-            ← Back to Community
+            <ArrowLeft className="w-4 h-4" />
+            Back to Community
           </button>
         </div>
       </div>

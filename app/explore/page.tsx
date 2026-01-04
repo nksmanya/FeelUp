@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import { Search, MapPin, Flame, Users as UsersIcon, UserPlus, MessageCircle } from "lucide-react";
 
 interface UserProfile {
   id: string;
@@ -267,9 +268,12 @@ export default function ExplorePage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-purple-800 mb-4">
-            🔍 Explore
-          </h1>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Search className="w-10 h-10 text-purple-600" />
+            <h1 className="text-5xl font-bold text-purple-800">
+              Explore
+            </h1>
+          </div>
           <p className="text-xl text-gray-600 mb-6 max-w-3xl mx-auto">
             Discover amazing people in our wellness community and build
             meaningful connections
@@ -341,7 +345,10 @@ export default function ExplorePage() {
                     <h3 className="font-semibold text-gray-900">
                       {user.full_name}
                     </h3>
-                    <p className="text-gray-500 text-sm">📍 {user.location}</p>
+                    <p className="text-gray-500 text-sm flex items-center gap-1">
+                      <MapPin className="w-3 h-3" />
+                      {user.location}
+                    </p>
                   </div>
                 </div>
                 {user.mood_streak && user.mood_streak > 0 && (
@@ -400,8 +407,14 @@ export default function ExplorePage() {
 
               {/* Stats */}
               <div className="flex justify-between text-sm text-gray-500 mb-4">
-                <span>👥 {user.followers_count} followers</span>
-                <span>Following {user.following_count}</span>
+                <span className="flex items-center gap-1">
+                  <UsersIcon className="w-4 h-4" />
+                  {user.followers_count} followers
+                </span>
+                <span className="flex items-center gap-1">
+                  <UserPlus className="w-4 h-4" />
+                  Following {user.following_count}
+                </span>
                 <span>{user.last_active}</span>
               </div>
 

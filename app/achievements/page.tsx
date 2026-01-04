@@ -265,9 +265,12 @@ export default function AchievementsPage() {
       <main className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
-            🏆 Achievements
-          </h1>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Trophy className="w-10 h-10 text-yellow-500" />
+            <h1 className="text-4xl font-bold text-gray-900">
+              Achievements
+            </h1>
+          </div>
           <div className="flex justify-center items-center gap-6">
             <div className="bg-white rounded-xl px-6 py-3 soft-glow">
               <div className="text-2xl font-bold text-blue-600">
@@ -370,7 +373,8 @@ export default function AchievementsPage() {
         {filteredLocked.length > 0 && (
           <div>
             <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
-              🔒 Available ({filteredLocked.length})
+              <Lock className="w-6 h-6 text-gray-400" />
+              Available ({filteredLocked.length})
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredLocked.map((achievement, idx) => (

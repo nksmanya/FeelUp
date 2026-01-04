@@ -6,15 +6,16 @@ import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import StreakDisplay from "../../components/StreakDisplay";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
+import { Target, Flame, CheckCircle2, Trophy } from "lucide-react";
 
-// Goal categories with emojis
+// Goal categories
 const goalCategories = [
-  { value: "study", label: "📚 Study", color: "#3b82f6" },
-  { value: "exercise", label: "💪 Exercise", color: "#ef4444" },
-  { value: "wellness", label: "🧘 Wellness", color: "#10b981" },
-  { value: "social", label: "👥 Social", color: "#f59e0b" },
-  { value: "creative", label: "🎨 Creative", color: "#8b5cf6" },
-  { value: "personal", label: "✨ Personal", color: "#06b6d4" },
+  { value: "study", label: "Study", color: "#3b82f6" },
+  { value: "exercise", label: "Exercise", color: "#ef4444" },
+  { value: "wellness", label: "Wellness", color: "#10b981" },
+  { value: "social", label: "Social", color: "#f59e0b" },
+  { value: "creative", label: "Creative", color: "#8b5cf6" },
+  { value: "personal", label: "Personal", color: "#06b6d4" },
 ];
 
 // Mood options for goal completion
@@ -237,9 +238,12 @@ export default function GoalsPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            🎯 Daily Goals
-          </h1>
+          <div className="flex items-center gap-3 mb-2">
+            <Target className="w-8 h-8 text-[var(--brand-blue)]" />
+            <h1 className="text-3xl font-bold text-gray-900">
+              Daily Goals
+            </h1>
+          </div>
           <p className="text-gray-600">
             Set and track your daily micro-goals for consistent progress.
           </p>
@@ -249,7 +253,7 @@ export default function GoalsPage() {
         <div className="mb-8">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
-              <div className="text-3xl">🔥</div>
+              <Flame className="w-8 h-8 text-orange-500 mb-2" />
               <div className="mt-2">
                 <StreakDisplay
                   userEmail={user?.email || ""}
@@ -261,7 +265,7 @@ export default function GoalsPage() {
             </div>
 
             <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
-              <div className="text-3xl">✅</div>
+              <CheckCircle2 className="w-8 h-8 text-green-500 mb-2" />
               <div className="text-3xl font-bold mt-2">
                 {completedGoals.length}/{goals.length || 1}
               </div>
@@ -269,7 +273,7 @@ export default function GoalsPage() {
             </div>
 
             <div className="bg-white rounded-2xl p-6 shadow-sm flex flex-col items-center text-center">
-              <div className="text-3xl">🏆</div>
+              <Trophy className="w-8 h-8 text-yellow-500 mb-2" />
               <div className="text-3xl font-bold mt-2">{completionRate}%</div>
               <div className="text-xs text-gray-500 mt-1">Completion Rate</div>
             </div>
@@ -403,8 +407,9 @@ export default function GoalsPage() {
           {/* Completed Goals */}
           {completedGoals.length > 0 && (
             <section>
-              <h2 className="text-lg font-semibold mb-4 text-green-600">
-                ✅ Completed Goals ({completedGoals.length})
+              <h2 className="text-lg font-semibold mb-4 text-green-600 flex items-center gap-2">
+                <CheckCircle2 className="w-5 h-5" />
+                Completed Goals ({completedGoals.length})
               </h2>
               <div className="grid gap-3">
                 {completedGoals.map((goal) => {

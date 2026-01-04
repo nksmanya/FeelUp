@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import StreakDisplay from "../../components/StreakDisplay";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
+import { BookOpen, Heart, Image as ImageIcon, Share2 } from "lucide-react";
 
 // Enhanced mood options with emojis and colors
 const moodOptions = [
@@ -281,9 +282,12 @@ export default function JournalPage() {
 
       <main className="max-w-4xl mx-auto px-4 py-8">
         <div className="mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 mb-2">
-            📝 Feel Journal
-          </h1>
+          <div className="flex items-center gap-3 mb-2">
+            <BookOpen className="w-8 h-8 text-[var(--brand-blue)]" />
+            <h1 className="text-3xl font-bold text-gray-900">
+              Feel Journal
+            </h1>
+          </div>
           <p className="text-gray-600">
             Your private space for thoughts, reflections, and gratitude.
           </p>

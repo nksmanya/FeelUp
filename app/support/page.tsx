@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { HelpCircle, Shield, Users, Wrench, Send, CheckCircle, AlertTriangle, Phone } from "lucide-react";
 
 export default function SupportPage() {
   const router = useRouter();

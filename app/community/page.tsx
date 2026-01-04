@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import { Users, Search, Sparkles, Plus, Users2, TrendingUp, ArrowUp, ArrowRight, AlertCircle } from "lucide-react";
 
 interface CommunityFeature {
   id: string;
@@ -271,9 +272,12 @@ export default function CommunityPage() {
       <main className="max-w-7xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-12">
-          <h1 className="text-5xl font-bold text-purple-800 mb-4">
-            🤝 Community
-          </h1>
+          <div className="flex items-center justify-center gap-3 mb-4">
+            <Users className="w-10 h-10 text-purple-600" />
+            <h1 className="text-5xl font-bold text-purple-800">
+              Community
+            </h1>
+          </div>
           <p className="text-xl text-gray-600 mb-6 max-w-3xl mx-auto">
             Connect, support, and grow together on your wellness journey
           </p>
@@ -300,16 +304,18 @@ export default function CommunityPage() {
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm ${
+                className={`px-4 py-2 rounded-lg font-medium transition-colors text-sm flex items-center gap-2 ${
                   activeTab === tab.id
                     ? "bg-purple-600 text-white"
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
+                <IconComponent className="w-4 h-4" />
                 {tab.label}
-                <span className="ml-1 text-xs opacity-75">({tab.count})</span>
+                <span className="text-xs opacity-75">({tab.count})</span>
               </button>
-            ))}
+              );
+            })}
           </div>
         </div>
 

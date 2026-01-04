@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import { Settings as SettingsIcon, Save, LogOut, Trash2 } from "lucide-react";
 
 export default function SettingsPage() {
   const { data: session } = useSession();
@@ -115,7 +116,10 @@ export default function SettingsPage() {
 
       <main className="max-w-3xl mx-auto px-4 py-8">
         <div className="bg-white rounded-xl p-8 soft-glow">
-          <h1 className="text-3xl font-bold text-gray-900 mb-8">⚙️ Settings</h1>
+          <div className="flex items-center gap-3 mb-8">
+            <SettingsIcon className="w-8 h-8 text-[var(--brand-blue)]" />
+            <h1 className="text-3xl font-bold text-gray-900">Settings</h1>
+          </div>
 
           {/* Privacy Settings */}
           <div className="mb-8">

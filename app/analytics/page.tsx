@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import { BarChart3, Flame, CheckCircle2, BookOpen, TrendingUp, Zap, Target } from "lucide-react";
 
 // Mock data generator for demo
 const generateMockMoodData = () => {
@@ -165,9 +166,12 @@ export default function AnalyticsPage() {
         {/* Header */}
         <div className="flex justify-between items-center mb-8">
           <div>
-            <h1 className="text-4xl font-bold text-gray-900 mb-2">
-              📊 Your Analytics
-            </h1>
+            <div className="flex items-center gap-3 mb-2">
+              <BarChart3 className="w-8 h-8 text-[var(--brand-blue)]" />
+              <h1 className="text-4xl font-bold text-gray-900">
+                Your Analytics
+              </h1>
+            </div>
             <p className="text-gray-600">
               Discover insights about your mood patterns and wellness journey
             </p>
@@ -267,8 +271,9 @@ export default function AnalyticsPage() {
 
           {/* Mood Distribution */}
           <div className="bg-white rounded-xl p-8 soft-glow">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              🎭 Mood Distribution
+            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <BarChart3 className="w-6 h-6" />
+              Mood Distribution
             </h2>
             <div className="space-y-3">
               {Object.entries(moodCounts)
@@ -338,8 +343,9 @@ export default function AnalyticsPage() {
 
           {/* Recommendations */}
           <div className="bg-white rounded-xl p-8 soft-glow">
-            <h2 className="text-xl font-bold text-gray-900 mb-6">
-              🎯 Recommendations
+            <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+              <Zap className="w-6 h-6" />
+              Recommendations
             </h2>
             <div className="space-y-4">
               <div className="flex gap-3">
@@ -392,8 +398,9 @@ export default function AnalyticsPage() {
 
         {/* Development Notice */}
         <div className="mt-8 bg-linear-to-r from-blue-50 to-purple-50 rounded-xl p-8 text-center">
-          <h2 className="text-2xl font-bold text-gray-900 mb-4">
-            🚧 Enhanced Analytics Coming Soon
+          <h2 className="text-2xl font-bold text-gray-900 mb-4 flex items-center justify-center gap-2">
+            <BarChart3 className="w-6 h-6" />
+            Enhanced Analytics Coming Soon
           </h2>
           <p className="text-gray-700 mb-4 max-w-2xl mx-auto">
             We're developing advanced analytics including trend predictions,

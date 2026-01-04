@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { Heart, Lock, Leaf, Users } from "lucide-react";
 
 export default function Footer() {
   const currentYear = new Date().getFullYear();
@@ -36,11 +37,6 @@ export default function Footer() {
               Building a more positive and supportive world through wellness
               tracking and meaningful connections.
             </p>
-            <div className="flex space-x-4">
-              <span className="text-2xl">🌟</span>
-              <span className="text-2xl">💖</span>
-              <span className="text-2xl">🌈</span>
-            </div>
           </div>
 
           {/* Quick Links */}
@@ -152,13 +148,22 @@ export default function Footer() {
 
         {/* Bottom */}
         <div className="border-t border-gray-100 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
-          <div className="text-sm text-[var(--feelup-muted)] mb-4 md:mb-0">
-            © {currentYear} FeelUp. Made with 💙 for your wellness journey.
+          <div className="text-sm text-[var(--feelup-muted)] mb-4 md:mb-0 flex items-center gap-2">
+            © {currentYear} FeelUp. Made with <Heart className="w-4 h-4 text-red-500" /> for your wellness journey.
           </div>
           <div className="flex items-center space-x-6 text-sm text-[var(--feelup-muted)]">
-            <span>🔒 Privacy Focused</span>
-            <span>🌱 Wellness First</span>
-            <span>🤝 Community Driven</span>
+            <div className="flex items-center gap-2">
+              <Lock className="w-4 h-4" />
+              <span>Privacy Focused</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Leaf className="w-4 h-4" />
+              <span>Wellness First</span>
+            </div>
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4" />
+              <span>Community Driven</span>
+            </div>
           </div>
         </div>
       </div>

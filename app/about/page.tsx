@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+import { Heart, Shield, TrendingUp, ArrowLeft, Mail } from "lucide-react";
 
 export default function AboutPage() {
   const router = useRouter();

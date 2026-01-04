@@ -5,6 +5,7 @@ import { useSession, signOut } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
 import { appCache, CACHE_KEYS } from "../../lib/cache";
+import { Trophy, Flame, Edit2 } from "lucide-react";
 
 export default function ProfilePage() {
   const { data: session } = useSession();
@@ -242,8 +243,9 @@ export default function ProfilePage() {
 
         {/* Achievements */}
         <div className="bg-white rounded-xl p-8 soft-glow mb-8">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            🏆 Achievements
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <Trophy className="w-6 h-6 text-yellow-500" />
+            Achievements
           </h2>
 
           {achievements.length === 0 ? (
@@ -282,8 +284,9 @@ export default function ProfilePage() {
 
         {/* Streaks */}
         <div className="bg-white rounded-xl p-8 soft-glow">
-          <h2 className="text-2xl font-bold text-gray-900 mb-6">
-            🔥 Your Streaks
+          <h2 className="text-2xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+            <Flame className="w-6 h-6 text-orange-500" />
+            Your Streaks
           </h2>
 
           {streaks.length === 0 ? (

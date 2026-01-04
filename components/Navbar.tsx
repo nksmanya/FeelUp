@@ -4,6 +4,19 @@ import { useState } from "react";
 import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
+import {
+  Heart,
+  Target,
+  BookOpen,
+  Calendar,
+  Search,
+  MessageCircle,
+  BarChart3,
+  User,
+  Settings,
+  Trophy,
+  LogOut,
+} from "lucide-react";
 
 export default function Navbar() {
   const { data: session } = useSession();
@@ -15,43 +28,43 @@ export default function Navbar() {
     {
       name: "Mood Feed",
       href: "/mood-feed",
-      icon: "💭",
+      icon: Heart,
       description: "Share & connect",
     },
     {
       name: "Goals",
       href: "/goals",
-      icon: "🎯",
+      icon: Target,
       description: "Track progress",
     },
     {
       name: "Journal",
       href: "/journal",
-      icon: "📝",
+      icon: BookOpen,
       description: "Private thoughts",
     },
     {
       name: "Events",
       href: "/events",
-      icon: "🗓️",
+      icon: Calendar,
       description: "Join activities",
     },
     {
       name: "Explore",
       href: "/explore",
-      icon: "🔍",
+      icon: Search,
       description: "Find friends",
     },
     {
       name: "Messages",
       href: "/messages",
-      icon: "💬",
+      icon: MessageCircle,
       description: "Chat privately",
     },
     {
       name: "Analytics",
       href: "/analytics",
-      icon: "📊",
+      icon: BarChart3,
       description: "Mood insights",
     },
   ];
@@ -100,7 +113,7 @@ export default function Navbar() {
                 }`}
               >
                 <div className="flex items-center space-x-2">
-                  <span>{item.icon}</span>
+                  <item.icon className="w-4 h-4" />
                   <span className="hidden lg:inline">{item.name}</span>
                 </div>
 
@@ -178,21 +191,21 @@ export default function Navbar() {
                       href="/profile"
                       className="flex items-center px-4 py-2 text-sm text-[var(--text-muted)] hover:bg-[rgba(15,23,42,0.03)]"
                     >
-                      <span className="mr-3">👤</span>
+                      <User className="w-4 h-4 mr-3" />
                       View Profile
                     </Link>
                     <Link
                       href="/settings"
                       className="flex items-center px-4 py-2 text-sm text-[var(--text-muted)] hover:bg-[rgba(15,23,42,0.03)]"
                     >
-                      <span className="mr-3">⚙️</span>
+                      <Settings className="w-4 h-4 mr-3" />
                       Settings
                     </Link>
                     <Link
                       href="/achievements"
                       className="flex items-center px-4 py-2 text-sm text-[var(--text-muted)] hover:bg-[rgba(15,23,42,0.03)]"
                     >
-                      <span className="mr-3">🏆</span>
+                      <Trophy className="w-4 h-4 mr-3" />
                       Achievements
                     </Link>
                     <div className="border-t border-gray-100 my-1"></div>
@@ -200,7 +213,7 @@ export default function Navbar() {
                       onClick={handleSignOut}
                       className="flex items-center w-full px-4 py-2 text-sm text-red-600 hover:bg-red-50"
                     >
-                      <span className="mr-3">🚪</span>
+                      <LogOut className="w-4 h-4 mr-3" />
                       Sign Out
                     </button>
                   </div>
@@ -222,16 +235,16 @@ export default function Navbar() {
       <div className="md:hidden border-t border-gray-200">
         <div className="flex overflow-x-auto py-2 px-4 space-x-1">
           {navigation.map((item) => (
-            <Link
-              key={item.name}
-              href={item.href}
-              className={`flex flex-col items-center min-w-0 flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                pathname === item.href
-                  ? "bg-purple-100 text-purple-700"
-                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
-              }`}
-            >
-              <span className="text-lg mb-1">{item.icon}</span>
+              <Link
+                key={item.name}
+                href={item.href}
+                className={`flex flex-col items-center min-w-0 flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
+                  pathname === item.href
+                    ? "bg-purple-100 text-purple-700"
+                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+                }`}
+              >
+              <item.icon className="w-5 h-5 mb-1" />
               <span className="truncate">{item.name}</span>
             </Link>
           ))}

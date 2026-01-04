@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import { MessageCircle, Send, Search, Users as UsersIcon } from "lucide-react";
 
 interface Message {
   id: string;
@@ -224,7 +225,7 @@ export default function MessagesClient() {
         <div className="flex justify-center items-center h-64">
           <div className="text-center bg-white rounded-xl p-8 shadow-sm">
             <div className="w-16 h-16 bg-purple-100 rounded-full flex items-center justify-center mx-auto mb-4">
-              <span className="text-2xl">💬</span>
+              <MessageCircle className="w-8 h-8 text-purple-600" />
             </div>
             <h2 className="text-xl font-semibold text-gray-800 mb-2">
               Messages
@@ -411,8 +412,9 @@ export default function MessagesClient() {
                       <button
                         onClick={sendMessage}
                         disabled={!newMessage.trim()}
-                        className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="px-6 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center gap-2"
                       >
+                        <Send className="w-4 h-4" />
                         Send
                       </button>
                     </div>
