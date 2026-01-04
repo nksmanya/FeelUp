@@ -310,12 +310,10 @@ export default function CommunityPage() {
                     : "text-gray-600 hover:bg-gray-100"
                 }`}
               >
-                <IconComponent className="w-4 h-4" />
                 {tab.label}
                 <span className="text-xs opacity-75">({tab.count})</span>
               </button>
-              );
-            })}
+            ))}
           </div>
         </div>
 

@@ -503,7 +503,9 @@ export default function MoodFeedPage() {
             </div>
           )}
 
-          {posts.map((post: any) => (
+          {posts.map((post: any) => {
+            const original = posts.find((p: any) => p.id === post.reposted_from) || null;
+            return (
             <article
                 key={post.id}
                 className="surface-card p-4 mb-4 max-w-2xl mx-auto w-full"
@@ -538,7 +540,20 @@ export default function MoodFeedPage() {
                   </div>
                   <div className="text-xs text-[var(--feelup-muted)]">
                     {timeAgo(post.created_at)}
+                    {post.updated_at && post.updated_at !== post.created_at && (
+                      <span className="ml-2 text-[var(--feelup-muted)]">(edited)</span>
+                    )}
                   </div>
+                  {post.reposted_from && (
+                    <div className="text-xs text-[var(--feelup-muted)] mt-1">
+                      🔁 Reposted{original ? (
+                        <>
+                          {' from '}
+                          <a href={`#${original.id}`} className="underline hover:text-blue-600">{original.profiles?.full_name || original.owner_email || 'Someone'}</a>
+                        </>
+                      ) : ' from another user'}
+                    </div>
+                  )}
                 </div>
               </div>
 
@@ -841,7 +856,8 @@ export default function MoodFeedPage() {
                 </div>
               )}
             </article>
-          ))}
+          );
+          })}
         </section>
       </main>
       <Footer />
