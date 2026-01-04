@@ -197,3 +197,52 @@ export async function PATCH(req: Request) {
     );
   }
 }
+
+export async function DELETE(req: Request) {
+  try {
+    const url = new URL(req.url);
+    const entry_id = url.searchParams.get("entry_id");
+    const user_email = url.searchParams.get("user_email");
+
+    if (!entry_id || !user_email) {
+      return NextResponse.json(
+        { error: "Entry ID and user email required" },
+        { status: 400 },
+      );
+    }
+
+    const allEntries = readEntries();
+    const entryIndex = allEntries.findIndex(
+      (entry: any) => entry.id === entry_id && entry.user_email === user_email,
+    );
+
+    if (entryIndex === -1) {
+      return NextResponse.json({ error: "Entry not found" }, { status: 404 });
+    }
+
+    const [removed] = allEntries.splice(entryIndex, 1);
+
+    // If the entry had an uploaded image and Cloudinary is configured, attempt to delete it.
+    if (removed?.image_url && process.env.CLOUDINARY_CLOUD_NAME) {
+      try {
+        // Cloudinary public_id extraction (best-effort)
+        const urlParts = removed.image_url.split("/");
+        const last = urlParts[urlParts.length - 1] || "";
+        const publicId = last.split(".")[0];
+        await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
+      } catch (e) {
+        console.warn("Failed to delete Cloudinary image for journal entry:", e);
+      }
+    }
+
+    writeEntries(allEntries);
+
+    return NextResponse.json({ ok: true });
+  } catch (err: any) {
+    console.error("Journal DELETE error:", err);
+    return NextResponse.json(
+      { error: err?.message || String(err) },
+      { status: 500 },
+    );
+  }
+}

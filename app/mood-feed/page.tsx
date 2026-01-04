@@ -632,6 +632,19 @@ export default function MoodFeedPage() {
                     <>
                       <button
                         type="button"
+                        aria-label="Edit"
+                        title="Edit"
+                        className="p-2 rounded-md bg-gray-50 hover:bg-gray-100"
+                        onClick={() => {
+                          setEditPostId(post.id);
+                          setEditContent(post.content || "");
+                        }}
+                      >
+                        ✏️
+                      </button>
+
+                      <button
+                        type="button"
                         aria-label="Repost"
                         title="Repost"
                         className="p-2 rounded-md bg-gray-50 hover:bg-gray-100"
@@ -709,6 +722,27 @@ export default function MoodFeedPage() {
                         }}
                       >
                         📤
+                      </button>
+                      <button
+                        type="button"
+                        aria-label="Delete"
+                        title="Delete"
+                        className="p-2 rounded-md bg-red-50 hover:bg-red-100"
+                        onClick={async () => {
+                          if (!confirm('Delete this post?')) return;
+                          try {
+                            const res = await fetch(`/api/mood-posts?id=${encodeURIComponent(post.id)}&owner_email=${encodeURIComponent(user.email)}`, { method: 'DELETE' });
+                            if (!res.ok) {
+                              const err = await res.json();
+                              return alert(err?.error || 'Failed to delete post');
+                            }
+                            await loadPosts();
+                          } catch (e) {
+                            alert('Failed to delete post');
+                          }
+                        }}
+                      >
+                        🗑️
                       </button>
                     </>
                   )}

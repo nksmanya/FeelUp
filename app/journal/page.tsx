@@ -204,6 +204,66 @@ export default function JournalPage() {
     }
   };
 
+  // Edit / Delete state and handlers
+  const [editingEntryId, setEditingEntryId] = useState<string | null>(null);
+  const [editFormData, setEditFormData] = useState<any>(null);
+
+  const startEditing = (entry: any) => {
+    setEditingEntryId(entry.id);
+    setEditFormData({ title: entry.title || "", content: entry.content || "", tags: entry.tags || [] });
+  };
+
+  const cancelEditing = () => {
+    setEditingEntryId(null);
+    setEditFormData(null);
+  };
+
+  const updateEntry = async (entryId: string) => {
+    try {
+      const res = await fetch("/api/journal", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          entry_id: entryId,
+          user_email: user.email,
+          title: editFormData.title,
+          content: editFormData.content,
+          tags: editFormData.tags,
+        }),
+      });
+
+      if (res.ok) {
+        cancelEditing();
+        await loadEntries();
+      } else {
+        const error = await res.json();
+        alert(error.error || "Failed to update entry");
+      }
+    } catch (e) {
+      alert("Failed to update entry");
+    }
+  };
+
+  const deleteEntry = async (entryId: string) => {
+    if (!confirm("Are you sure you want to delete this entry?")) return;
+    try {
+      const res = await fetch(`/api/journal?entry_id=${entryId}&user_email=${encodeURIComponent(user.email)}`, {
+        method: "DELETE",
+      });
+
+      if (res.ok) {
+        // If deleting the entry being edited, reset edit state
+        if (editingEntryId === entryId) cancelEditing();
+        await loadEntries();
+      } else {
+        const error = await res.json();
+        alert(error.error || "Failed to delete entry");
+      }
+    } catch (e) {
+      alert("Failed to delete entry");
+    }
+  };
+
   const addCustomTag = () => {
     if (
       customTag.trim() &&
@@ -607,8 +667,7 @@ y-100"                                                                          
                 <button
                   type="button"
                   onClick={() => {
-                    setShowNewEntry(false);
-                    setShowGratitude(false);
+                    setEntryType(null);
                     setSelectedMood(null);
                     setSelectedTags([]);
                     setCustomTag("");
@@ -661,7 +720,8 @@ y-100"                                                                          
                     </div>
                   </div>
                 </div>
-                {!entry.is_gratitude && entry.can_convert_to_post && (
+                <div className="flex items-center gap-2">
+                  {!entry.is_gratitude && entry.can_convert_to_post && (
                   <button
                     onClick={() => convertToPost(entry)}
                     className="text-xs bg-blue-100 hover:bg-blue-200 text-blue-700 px-2 py-1 rounded-md transition-colors"
@@ -670,11 +730,56 @@ y-100"                                                                          
                     Share 📤
                   </button>
                 )}
+                  <button
+                    onClick={() => startEditing(entry)}
+                    className="text-xs bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-2 py-1 rounded-md transition-colors"
+                    title="Edit entry"
+                  >
+                    Edit ✏️
+                  </button>
+                  <button
+                    onClick={() => deleteEntry(entry.id)}
+                    className="text-xs bg-red-100 hover:bg-red-200 text-red-700 px-2 py-1 rounded-md transition-colors"
+                    title="Delete entry"
+                  >
+                    Delete 🗑️
+                  </button>
+                </div>
               </div>
 
-              <div className="text-gray-800 leading-relaxed mb-3 whitespace-pre-wrap">
-                {entry.content}
-              </div>
+              {editingEntryId === entry.id ? (
+                <div className="grid gap-2">
+                  <input
+                    type="text"
+                    value={editFormData?.title || ""}
+                    onChange={(e) => setEditFormData({ ...editFormData, title: e.target.value })}
+                    className="input-field"
+                  />
+                  <textarea
+                    value={editFormData?.content || ""}
+                    onChange={(e) => setEditFormData({ ...editFormData, content: e.target.value })}
+                    className="input-field h-32"
+                  />
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => updateEntry(entry.id)}
+                      className="btn-primary rounded px-3 py-2"
+                    >
+                      Save
+                    </button>
+                    <button
+                      onClick={cancelEditing}
+                      className="btn-secondary rounded px-3 py-2"
+                    >
+                      Cancel
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="text-gray-800 leading-relaxed mb-3 whitespace-pre-wrap">
+                  {entry.content}
+                </div>
+              )}
 
               {entry.image_url && (
                 <div className="mt-3">

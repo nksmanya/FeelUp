@@ -123,18 +123,22 @@
     "updated_at": "2025-12-02T05:20:14.734Z"
   },
   {
-    "id": "1767503360107",
+    "id": "1767504313541",
     "user_email": "manyainfinite@gmail.com",
-    "title": "New year resolutions?",
-    "content": "Did some works to keep on the goals",
+    "title": "2026!",
+    "content": "Got new resolutions to be done for this year.",
     "image_url": null,
-    "mood_tag": null,
-    "mood_emoji": null,
-    "energy_level": null,
-    "tags": [],
+    "mood_tag": "Hopeful",
+    "mood_emoji": "🌟",
+    "energy_level": 5,
+    "tags": [
+      "grateful",
+      "reflection",
+      "goals"
+    ],
     "is_gratitude": false,
     "can_convert_to_post": false,
-    "created_at": "2026-01-04T05:09:20.107Z",
-    "updated_at": "2026-01-04T05:09:20.107Z"
+    "created_at": "2026-01-04T05:25:13.541Z",
+    "updated_at": "2026-01-04T05:25:13.541Z"
   }
 ]
