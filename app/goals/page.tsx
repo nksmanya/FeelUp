@@ -72,6 +72,14 @@ export default function GoalsPage() {
     [user?.email, selectedDate],
   );
 
+  const changeDateBy = async (days: number) => {
+    const cur = selectedDate ? new Date(selectedDate) : new Date();
+    cur.setDate(cur.getDate() + days);
+    const newDate = cur.toISOString().split("T")[0];
+    setSelectedDate(newDate);
+    await loadGoals(newDate);
+  };
+
   const addGoal = async (e: React.FormEvent) => {
     e.preventDefault();
     const form = e.target as HTMLFormElement;
@@ -290,14 +298,47 @@ export default function GoalsPage() {
         {/* heading area (kept above) */}
 
         {/* Date Selector */}
-        <div className="mb-6">
-          <label className="block text-sm font-medium mb-2">Select Date:</label>
-          <input
-            type="date"
-            value={selectedDate}
-            onChange={(e) => setSelectedDate(e.target.value)}
-            className="input-field w-48"
-          />
+        <div className="mb-6 flex items-center gap-3">
+          <label className="block text-sm font-medium">Select Date:</label>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => changeDateBy(-1)}
+              className="px-3 py-2 bg-white border rounded-lg"
+              aria-label="Previous day"
+            >
+              ◀
+            </button>
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={async (e) => {
+                const d = e.target.value;
+                setSelectedDate(d);
+                await loadGoals(d);
+              }}
+              className="input-field w-48"
+            />
+            <button
+              type="button"
+              onClick={() => changeDateBy(1)}
+              className="px-3 py-2 bg-white border rounded-lg"
+              aria-label="Next day"
+            >
+              ▶
+            </button>
+            <button
+              type="button"
+              onClick={async () => {
+                const today = new Date().toISOString().split("T")[0];
+                setSelectedDate(today);
+                await loadGoals(today);
+              }}
+              className="px-3 py-2 bg-white border rounded-lg"
+            >
+              Today
+            </button>
+          </div>
         </div>
 
         {/* Add Goal Section */}
