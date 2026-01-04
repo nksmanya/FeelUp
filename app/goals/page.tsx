@@ -75,6 +75,7 @@ export default function GoalsPage() {
   // Edit/Delete state and handlers
   const [editingGoalId, setEditingGoalId] = useState<string | null>(null);
   const [editGoalData, setEditGoalData] = useState<any>(null);
+  const [streakRefreshKey, setStreakRefreshKey] = useState(0);
 
   const startEditing = (goal: any) => {
     setEditingGoalId(goal.id);
@@ -189,16 +190,20 @@ export default function GoalsPage() {
         setCompletingGoal(null);
         await loadGoals();
 
-        // Update streak for goal completion
+        // Update streak for goal completion (only once per day)
         try {
-          await fetch("/api/streaks", {
+          const streakRes = await fetch("/api/streaks", {
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
               user_email: user.email,
               streak_type: "goals",
+              activity_date: selectedDate || new Date().toISOString().split("T")[0],
             }),
           });
+          if (streakRes.ok) {
+            setStreakRefreshKey((k) => k + 1);
+          }
         } catch (e) {
           console.log("Failed to update streak");
         }
@@ -325,6 +330,7 @@ export default function GoalsPage() {
                   userEmail={user?.email || ""}
                   streakType="goals"
                   size="small"
+                  refreshKey={streakRefreshKey}
                 />
               </div>
               <div className="text-xs text-gray-500 mt-1">Day Streak</div>
@@ -630,6 +636,28 @@ export default function GoalsPage() {
                                   const err = await res.json();
                                   return alert(err?.error || "Failed to undo completion");
                                 }
+                                // If this goal was completed today, decrement the streak
+                                try {
+                                  const completedDate = new Date(goal.completed_at).toISOString().split("T")[0];
+                                  const today = new Date().toISOString().split("T")[0];
+                                  // Only decrement if the completion happened today (i.e., streak may have been advanced)
+                                  if (completedDate === today) {
+                                    await fetch("/api/streaks", {
+                                      method: "PATCH",
+                                      headers: { "Content-Type": "application/json" },
+                                      body: JSON.stringify({
+                                        user_email: user.email,
+                                        streak_type: "goals",
+                                        action: "decrement",
+                                        activity_date: completedDate,
+                                      }),
+                                    });
+                                    setStreakRefreshKey((k) => k + 1);
+                                  }
+                                } catch (e) {
+                                  console.log("Failed to adjust streak on undo", e);
+                                }
+
                                 await loadGoals();
                               } catch (e) {
                                 alert("Failed to undo completion");

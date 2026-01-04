@@ -6,19 +6,21 @@ interface StreakDisplayProps {
   userEmail: string;
   streakType: string;
   size?: "small" | "medium" | "large";
+  refreshKey?: number;
 }
 
 export default function StreakDisplay({
   userEmail,
   streakType,
   size = "medium",
+  refreshKey,
 }: StreakDisplayProps) {
   const [streak, setStreak] = useState<any>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     loadStreak();
-  }, [userEmail, streakType]);
+  }, [userEmail, streakType, refreshKey]);
 
   const loadStreak = async () => {
     if (!userEmail) return;
