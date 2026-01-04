@@ -410,6 +410,25 @@ export default function GoalsPage() {
                   const category = goalCategories.find(
                     (c) => c.value === goal.category,
                   );
+                  const categoryIcon = (val?: string) => {
+                    switch (val) {
+                      case "study":
+                        return "📚";
+                      case "exercise":
+                        return "🏃";
+                      case "wellness":
+                        return "🧘";
+                      case "social":
+                        return "👥";
+                      case "creative":
+                        return "🎨";
+                      case "personal":
+                        return "🌟";
+                      default:
+                        return "•";
+                    }
+                  };
+
                   return (
                     <div
                       key={goal.id}
@@ -417,7 +436,7 @@ export default function GoalsPage() {
                     >
                       <div className="flex items-center gap-4">
                         <div className="w-12 h-12 rounded-full bg-emerald-50 flex items-center justify-center text-2xl">
-                          {category?.label?.split(" ")[0] || "•"}
+                          <span aria-hidden>{categoryIcon(category?.value)}</span>
                         </div>
                         <div>
                           <h3 className="font-medium text-gray-900">
