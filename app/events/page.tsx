@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
-import { Calendar, Heart, BookOpen, Users, Dumbbell, Star, Plus, Check, Clock, MapPin, User, BarChart3 } from "lucide-react";
+import { Calendar, Heart, BookOpen, Users, Dumbbell, Star, Plus, Check, Clock, MapPin, User, BarChart3, X } from "lucide-react";
 
 interface Event {
   id: string;
@@ -337,6 +337,41 @@ export default function EventsPage() {
             </button>
           )}
         </div>
+
+        {/* Create Event Modal */}
+        {showCreateForm && (
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl p-8 max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">Create New Event</h2>
+                <button
+                  onClick={() => setShowCreateForm(false)}
+                  className="p-2 hover:bg-gray-100 rounded-lg transition-colors"
+                  aria-label="Close"
+                >
+                  <X className="w-5 h-5 text-gray-500" />
+                </button>
+              </div>
+              
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-6 text-center">
+                <Calendar className="w-12 h-12 text-blue-500 mx-auto mb-4" />
+                <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                  Event Creation Coming Soon
+                </h3>
+                <p className="text-gray-600 mb-4">
+                  We're working on adding the ability to create and manage your own events. 
+                  This feature will be available soon!
+                </p>
+                <button
+                  onClick={() => setShowCreateForm(false)}
+                  className="btn-primary px-6 py-2 rounded-lg"
+                >
+                  Got it
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
 
         {/* Filters */}
         <div className="bg-white rounded-xl p-6 shadow-sm mb-8">

@@ -112,6 +112,9 @@ export async function PATCH(req: Request) {
       completed,
       mood_at_completion,
       reflection_note,
+      title,
+      description,
+      category,
     } = await req.json();
 
     if (!goal_id || !user_email) {
@@ -134,50 +137,58 @@ export async function PATCH(req: Request) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    // Update goal completion status
+    // Update goal data
     const updateData: any = {};
 
-    if (completed) {
-      updateData.completed_at = new Date().toISOString();
-      updateData.mood_at_completion = mood_at_completion;
-      updateData.reflection_note = reflection_note;
+    // Handle completion status
+    if (completed !== undefined) {
+      if (completed) {
+        updateData.completed_at = new Date().toISOString();
+        updateData.mood_at_completion = mood_at_completion;
+        updateData.reflection_note = reflection_note;
 
-      // Update user's total goals completed
-      await supabase
-        .from("profiles")
-        .update({
-          total_goals_completed: (profile.total_goals_completed || 0) + 1,
-          updated_at: new Date().toISOString(),
-        })
-        .eq("id", profile.id);
+        // Update user's total goals completed
+        await supabase
+          .from("profiles")
+          .update({
+            total_goals_completed: (profile.total_goals_completed || 0) + 1,
+            updated_at: new Date().toISOString(),
+          })
+          .eq("id", profile.id);
 
-      // Check for streak achievements
-      const today = new Date().toISOString().split("T")[0];
-      const { data: todayGoals } = await supabase
-        .from("daily_goals")
-        .select("completed_at")
-        .eq("user_id", profile.id)
-        .eq("target_date", today)
-        .not("completed_at", "is", null);
+        // Check for streak achievements
+        const today = new Date().toISOString().split("T")[0];
+        const { data: todayGoals } = await supabase
+          .from("daily_goals")
+          .select("completed_at")
+          .eq("user_id", profile.id)
+          .eq("target_date", today)
+          .not("completed_at", "is", null);
 
-      if (todayGoals && todayGoals.length >= 3) {
-        // Award achievement for completing 3 goals in a day
-        try {
-          await supabase.from("achievements").upsert({
-            user_id: profile.id,
-            badge_type: "daily_achiever",
-            badge_name: "Daily Achiever",
-            description: "Completed 3 goals in a single day",
-          });
-        } catch (e) {
-          // Ignore achievement errors
+        if (todayGoals && todayGoals.length >= 3) {
+          // Award achievement for completing 3 goals in a day
+          try {
+            await supabase.from("achievements").upsert({
+              user_id: profile.id,
+              badge_type: "daily_achiever",
+              badge_name: "Daily Achiever",
+              description: "Completed 3 goals in a single day",
+            });
+          } catch (e) {
+            // Ignore achievement errors
+          }
         }
+      } else {
+        updateData.completed_at = null;
+        updateData.mood_at_completion = null;
+        updateData.reflection_note = null;
       }
-    } else {
-      updateData.completed_at = null;
-      updateData.mood_at_completion = null;
-      updateData.reflection_note = null;
     }
+
+    // Handle editing title, description, category (only if goal is not completed)
+    if (title !== undefined) updateData.title = title.trim();
+    if (description !== undefined) updateData.description = description?.trim() || null;
+    if (category !== undefined) updateData.category = category;
 
     const { data: updatedGoal, error } = await supabase
       .from("daily_goals")
