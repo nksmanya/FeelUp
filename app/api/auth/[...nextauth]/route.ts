@@ -45,7 +45,6 @@ const handler = NextAuth({
     }),
   ],
   secret: process.env.NEXTAUTH_SECRET,
-  debug: !!process.env.NEXTAUTH_DEBUG,
   session: {
     strategy: "jwt",
   },
@@ -79,5 +78,4 @@ const handler = NextAuth({
   },
 });
 
-// Export the handler for all common HTTP methods to avoid method mismatches
-export { handler as GET, handler as POST, handler as PUT, handler as DELETE, handler as PATCH, handler as OPTIONS, handler as HEAD };
+export { handler as GET, handler as POST };

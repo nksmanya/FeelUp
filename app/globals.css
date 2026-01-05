@@ -1,8 +1,8 @@
 @import "tailwindcss";
 
 :root {
-  --background: #f6f7f8;
-  --foreground: #1f2933;
+  --background: #ffffff;
+  --foreground: #171717;
 }
 
 @theme inline {
@@ -20,8 +20,8 @@ html {
 }
 
 body {
-  /* Calm neutral background */
-  background: linear-gradient(180deg, #f6f7f8 0%, #f3f4f6 100%);
+  /* Very light, calming background — soft blue to white */
+  background: linear-gradient(180deg, #f7fbfc 0%, #ffffff 100%);
   color: var(--foreground);
   font-family:
     Inter,
@@ -51,42 +51,40 @@ body {
 
 /* Calm theme tokens */
 :root {
-  --feelup-accent: #9ca3af; /* soft gray accent */
-  --feelup-accent-2: #eef2f6; /* pale neutral */
-  --feelup-muted: #6b7280; /* muted slate */
+  --feelup-accent: #7dd3fc; /* light blue */
+  --feelup-accent-2: #c7f9f9; /* pale aqua */
+  --feelup-muted: #6b7a89; /* muted text - slightly warmer */
   --radius-md: 12px;
-  --shadow-soft: 0 6px 18px rgba(15, 23, 42, 0.04);
+  --shadow-soft: 0 6px 18px rgba(37, 150, 190, 0.06);
 }
 
 /* Brand palette */
 :root {
-  --brand-blue: #6b7280; /* neutral slate used as primary */
-  --brand-blue-light: #e6e9ee; /* very light slate */
-  --brand-pink: #d1d5db; /* soft neutral tone (kept for subtle accents) */
-  --brand-peach: #e9eaf0;
-  --brand-black: #111827; /* readable dark slate */
+  --brand-blue: #2596be;
+  --brand-blue-light: #93cae3;
+  --brand-pink: #ff7ea8;
+  --brand-peach: #ffa3ae;
+  --brand-black: #071421; /* deep slate for better readability without heavy black */
   --brand-white: #ffffff;
 
-  /* Map legacy variables to calm grays */
+  /* Map legacy variables to new palette */
   --feelup-accent: var(--brand-blue);
   --feelup-accent-2: var(--brand-blue-light);
-  --feelup-muted: #6b7280;
-  /* Logo gradient helper */
-  --logo-gradient: linear-gradient(90deg, var(--brand-blue-light), var(--brand-peach));
+  --feelup-muted: #6b7a89;
 }
 
 /* Input helpers */
 .input-field {
   background: var(--brand-white);
-  border: 1px solid rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(37, 150, 190, 0.12);
   padding: 0.6rem 0.75rem;
   border-radius: 10px;
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.02);
+  box-shadow: 0 6px 18px rgba(37, 150, 190, 0.03);
   color: var(--brand-black);
 }
 .input-field:focus {
   outline: none;
-  box-shadow: 0 6px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 6px 24px rgba(37, 150, 190, 0.12);
   border-color: var(--brand-blue);
 }
 
@@ -116,13 +114,13 @@ body {
   background: var(--brand-blue);
   color: var(--brand-white);
   border: none;
-  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.06);
+  box-shadow: 0 8px 24px rgba(37, 150, 190, 0.12);
   border-radius: 12px;
   padding: 0.6rem 0.9rem;
 }
 .btn-secondary {
   background: transparent;
-  border: 1px solid rgba(15, 23, 42, 0.06);
+  border: 1px solid rgba(37, 150, 190, 0.12);
   color: var(--brand-blue);
   border-radius: 12px;
   padding: 0.5rem 0.8rem;
@@ -163,20 +161,8 @@ body {
   --space-3: 18px;
   --space-4: 24px;
   --text-muted: #68707a;
-  --card-bg: linear-gradient(180deg, #ffffff, #f3f4f6);
+  --card-bg: linear-gradient(180deg, #ffffff, #fbfdff);
   --surface-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
-}
-
-/* Semantic mood colors (calm gray palette) */
-:root {
-  --mood-happy: #e6e9ee;
-  --mood-calm: #f3f4f6;
-  --mood-excited: #e5e7eb;
-  --mood-grateful: #d1d5db;
-  --mood-thoughtful: #e6e6f0;
-  --mood-sad: #d1d5db;
-  --mood-anxious: #f1d5d8;
-  --mood-tired: #9ca3af;
 }
 
 /* Card / post surface for social feed */
@@ -196,7 +182,7 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  background: var(--logo-gradient);
+  background: linear-gradient(90deg, #e6f7ff, #fff0f6);
   border: 1px solid rgba(15, 23, 42, 0.04);
 }
 

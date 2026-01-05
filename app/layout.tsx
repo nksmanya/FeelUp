@@ -3,7 +3,9 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Providers from "../components/Providers";
 import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
 import Topbar from "../components/Topbar";
+import { Search } from "lucide-react";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -40,9 +42,36 @@ export default function RootLayout({
           <div className="flex">
             <Sidebar />
             <div className="flex-1 min-h-screen">
-              <div className="sticky top-0 z-30 bg-white/60 backdrop-blur-sm border-b">
-                <Topbar />
+              <div className="sticky top-0 z-40 bg-white/60 backdrop-blur-sm border-b">
+                <div className="max-w-7xl mx-auto px-4 py-2 flex items-center gap-4">
+                  <div className="flex items-center md:hidden">
+                    <Navbar />
+                  </div>
+
+                  <div className="flex-1 flex justify-center">
+                    <div className="hidden sm:flex items-center w-full max-w-2xl bg-white/0 border border-gray-200 rounded-full px-3 py-2 shadow-sm">
+                      <div className="flex items-center px-3">
+                        <Search className="w-5 h-5 text-[var(--text-muted)]" />
+                      </div>
+                      <input
+                        aria-label="Chat with AI"
+                        placeholder="Find anything"
+                        className="flex-1 px-3 text-sm bg-transparent outline-none placeholder:tracking-wide"
+                      />
+                      <div className="ml-3">
+                        <button className="inline-flex items-center gap-2 px-4 py-1.5 rounded-full bg-gradient-to-r from-orange-400 to-yellow-400 text-white text-sm font-medium">
+                          Ask
+                        </button>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center">
+                    <Topbar />
+                  </div>
+                </div>
               </div>
+
               <main>{children}</main>
             </div>
           </div>

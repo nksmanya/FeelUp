@@ -10,12 +10,12 @@ import { Target, Flame, CheckCircle2, Trophy } from "lucide-react";
 
 // Goal categories
 const goalCategories = [
-  { value: "study", label: "Study", color: "var(--mood-thoughtful)" },
-  { value: "exercise", label: "Exercise", color: "var(--mood-anxious)" },
-  { value: "wellness", label: "Wellness", color: "var(--mood-grateful)" },
-  { value: "social", label: "Social", color: "var(--mood-happy)" },
-  { value: "creative", label: "Creative", color: "var(--mood-thoughtful)" },
-  { value: "personal", label: "Personal", color: "var(--mood-calm)" },
+  { value: "study", label: "Study", color: "#3b82f6" },
+  { value: "exercise", label: "Exercise", color: "#ef4444" },
+  { value: "wellness", label: "Wellness", color: "#10b981" },
+  { value: "social", label: "Social", color: "#f59e0b" },
+  { value: "creative", label: "Creative", color: "#8b5cf6" },
+  { value: "personal", label: "Personal", color: "#06b6d4" },
 ];
 
 // Mood options for goal completion

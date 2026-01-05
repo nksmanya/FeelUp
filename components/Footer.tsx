@@ -15,7 +15,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-[var(--card-bg)] border-t border-gray-100 mt-16 soft-glow">
+    <footer className="bg-[linear-gradient(180deg,#f8fdff,#ffffff)] border-t border-gray-100 mt-16 soft-glow">
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}

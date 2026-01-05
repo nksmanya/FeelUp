@@ -10,14 +10,14 @@ import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 
 // Mood options with emojis and colors
 const moodOptions = [
-  { label: "Happy", emoji: "😊", color: "var(--mood-happy)" },
-  { label: "Calm", emoji: "😌", color: "var(--mood-calm)" },
-  { label: "Excited", emoji: "🤩", color: "var(--mood-excited)" },
-  { label: "Grateful", emoji: "🙏", color: "var(--mood-grateful)" },
-  { label: "Thoughtful", emoji: "🤔", color: "var(--mood-thoughtful)" },
-  { label: "Sad", emoji: "😔", color: "var(--mood-sad)" },
-  { label: "Anxious", emoji: "😰", color: "var(--mood-anxious)" },
-  { label: "Tired", emoji: "😴", color: "var(--mood-tired)" },
+  { label: "Happy", emoji: "😊", color: "#fbbf24" },
+  { label: "Calm", emoji: "😌", color: "#60a5fa" },
+  { label: "Excited", emoji: "🤩", color: "#f472b6" },
+  { label: "Grateful", emoji: "🙏", color: "#34d399" },
+  { label: "Thoughtful", emoji: "🤔", color: "#a78bfa" },
+  { label: "Sad", emoji: "😔", color: "#94a3b8" },
+  { label: "Anxious", emoji: "😰", color: "#fb7185" },
+  { label: "Tired", emoji: "😴", color: "#6b7280" },
 ];
 
 // Positive reaction types

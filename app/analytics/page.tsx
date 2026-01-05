@@ -36,14 +36,14 @@ const generateMockMoodData = () => {
 };
 
 const moodColors: { [key: string]: string } = {
-  Happy: "var(--mood-happy)",
-  Calm: "var(--mood-calm)",
-  Excited: "var(--mood-excited)",
-  Grateful: "var(--mood-grateful)",
-  Thoughtful: "var(--mood-thoughtful)",
-  Sad: "var(--mood-sad)",
-  Anxious: "var(--mood-anxious)",
-  Tired: "var(--mood-tired)",
+  Happy: "#fbbf24",
+  Calm: "#60a5fa",
+  Excited: "#f472b6",
+  Grateful: "#34d399",
+  Thoughtful: "#a78bfa",
+  Sad: "#94a3b8",
+  Anxious: "#fb7185",
+  Tired: "#6b7280",
 };
 
 export default function AnalyticsPage() {
