@@ -139,7 +139,7 @@ export default function Navbar() {
                   <div
                     className="w-9 h-9 rounded-full flex items-center justify-center text-white font-semibold text-sm"
                     style={{
-                      background: "linear-gradient(90deg,#e6f7ff,#fff0f6)",
+                      background: "var(--logo-gradient)",
                       color: "var(--brand-blue)",
                     }}
                   >

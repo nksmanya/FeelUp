@@ -10,30 +10,30 @@ import { BookOpen, Heart, Image as ImageIcon, Share2, Plus, X } from "lucide-rea
 
 // Enhanced mood options with emojis and colors
 const moodOptions = [
-  { label: "Happy", emoji: "😊", color: "#fbbf24" },
-  { label: "Calm", emoji: "😌", color: "#60a5fa" },
-  { label: "Excited", emoji: "🤩", color: "#f472b6" },
-  { label: "Grateful", emoji: "🙏", color: "#34d399" },
-  { label: "Thoughtful", emoji: "🤔", color: "#a78bfa" },
-  { label: "Curious", emoji: "🤷‍♀️", color: "#fb7185" },
-  { label: "Peaceful", emoji: "☮️", color: "#10b981" },
-  { label: "Hopeful", emoji: "🌟", color: "#fbbf24" },
-  { label: "Motivated", emoji: "💪", color: "#ef4444" },
-  { label: "Creative", emoji: "🎨", color: "#8b5cf6" },
-  { label: "Reflective", emoji: "🌙", color: "#6366f1" },
-  { label: "Energetic", emoji: "⚡", color: "#f59e0b" },
-  { label: "Sad", emoji: "😔", color: "#94a3b8" },
-  { label: "Anxious", emoji: "😰", color: "#fb7185" },
-  { label: "Tired", emoji: "😴", color: "#6b7280" },
-  { label: "Overwhelmed", emoji: "😵‍💫", color: "#f87171" },
+  { label: "Happy", emoji: "😊", color: "var(--mood-happy)" },
+  { label: "Calm", emoji: "😌", color: "var(--mood-calm)" },
+  { label: "Excited", emoji: "🤩", color: "var(--mood-excited)" },
+  { label: "Grateful", emoji: "🙏", color: "var(--mood-grateful)" },
+  { label: "Thoughtful", emoji: "🤔", color: "var(--mood-thoughtful)" },
+  { label: "Curious", emoji: "🤷‍♀️", color: "var(--mood-excited)" },
+  { label: "Peaceful", emoji: "☮️", color: "var(--mood-grateful)" },
+  { label: "Hopeful", emoji: "🌟", color: "var(--mood-happy)" },
+  { label: "Motivated", emoji: "💪", color: "var(--mood-anxious)" },
+  { label: "Creative", emoji: "🎨", color: "var(--mood-thoughtful)" },
+  { label: "Reflective", emoji: "🌙", color: "var(--mood-thoughtful)" },
+  { label: "Energetic", emoji: "⚡", color: "var(--mood-happy)" },
+  { label: "Sad", emoji: "😔", color: "var(--mood-sad)" },
+  { label: "Anxious", emoji: "😰", color: "var(--mood-anxious)" },
+  { label: "Tired", emoji: "😴", color: "var(--mood-tired)" },
+  { label: "Overwhelmed", emoji: "😵‍💫", color: "var(--mood-anxious)" },
 ];
 
 const energyLevels = [
-  { value: 1, label: "Very Low", emoji: "😴", color: "#6b7280" },
-  { value: 2, label: "Low", emoji: "😔", color: "#9ca3af" },
-  { value: 3, label: "Medium", emoji: "😐", color: "#60a5fa" },
-  { value: 4, label: "High", emoji: "😊", color: "#34d399" },
-  { value: 5, label: "Very High", emoji: "🚀", color: "#f59e0b" },
+  { value: 1, label: "Very Low", emoji: "😴", color: "var(--mood-tired)" },
+  { value: 2, label: "Low", emoji: "😔", color: "var(--mood-sad)" },
+  { value: 3, label: "Medium", emoji: "😐", color: "var(--mood-excited)" },
+  { value: 4, label: "High", emoji: "😊", color: "var(--mood-grateful)" },
+  { value: 5, label: "Very High", emoji: "🚀", color: "var(--mood-happy)" },
 ];
 
 // Predefined tags
