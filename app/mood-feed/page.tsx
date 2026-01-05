@@ -4,6 +4,7 @@ import { useEffect, useState, useCallback, useMemo, useRef } from "react";
 import { createBrowserSupabaseClient } from "../../lib/supabaseClient";
 import { useRouter } from "next/navigation";
 import Navbar from "../../components/Navbar";
+import RightSidebar from "../../components/RightSidebar";
 import Footer from "../../components/Footer";
 import { useSession, signOut as nextAuthSignOut } from "next-auth/react";
 
@@ -298,7 +299,9 @@ export default function MoodFeedPage() {
     <div className="min-h-screen bg-gray-50">
       <Navbar />
 
-      <main className="max-w-4xl mx-auto px-4 py-4">
+      <main className="px-4 py-4">
+        <div className="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-[minmax(0,1fr)_320px] gap-6">
+          <div className="min-w-0">
 
         <section className="mb-8">
           {!composerOpen ? (
@@ -859,6 +862,9 @@ export default function MoodFeedPage() {
           );
           })}
         </section>
+          </div>
+          <RightSidebar userEmail={user?.email} />
+        </div>
       </main>
       <Footer />
     </div>
