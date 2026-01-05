@@ -15,6 +15,11 @@ import {
   Settings,
   Trophy,
   LogOut,
+  Info,
+  Shield,
+  HelpCircle,
+  FileText,
+  ChevronUp,
 } from "lucide-react";
 
 export default function Sidebar() {
@@ -30,6 +35,14 @@ export default function Sidebar() {
     { name: "Explore", href: "/explore", icon: Search },
     { name: "Messages", href: "/messages", icon: MessageCircle },
     { name: "Analytics", href: "/analytics", icon: BarChart3 },
+  ];
+
+  const resourceLinks = [
+    { name: "About", href: "/about", icon: Info },
+    { name: "Privacy Policy", href: "/privacy", icon: Shield },
+    { name: "Settings", href: "/settings", icon: Settings },
+    { name: "Support", href: "/support", icon: HelpCircle },
+    { name: "Terms", href: "/terms", icon: FileText },
   ];
 
   const handleSignOut = async () => {
@@ -67,6 +80,33 @@ export default function Sidebar() {
             </li>
           ))}
         </ul>
+
+        {/* Resources Section */}
+        <div className="mt-8 px-2">
+          <div className="flex items-center justify-between mb-2 px-1">
+            <h3 className="text-xs font-semibold text-[var(--feelup-muted)] uppercase tracking-wide">
+              Resources
+            </h3>
+            <ChevronUp className="w-3 h-3 text-[var(--feelup-muted)]" />
+          </div>
+          <ul className="space-y-1">
+            {resourceLinks.map((item) => (
+              <li key={item.name}>
+                <Link
+                  href={item.href}
+                  className={`flex items-center gap-3 px-2 py-1.5 rounded-md transition-colors mx-1 ${
+                    pathname === item.href
+                      ? "bg-[rgba(37,150,190,0.08)] text-[var(--brand-blue)]"
+                      : "text-[var(--text-muted)] hover:bg-[rgba(37,150,190,0.03)] hover:text-[var(--brand-blue)]"
+                  }`}
+                >
+                  <item.icon className="w-4 h-4" />
+                  <span className="font-medium text-xs">{item.name}</span>
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
       </nav>
 
       <div className="flex-0 p-3 border-t">
