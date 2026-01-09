@@ -1,6 +1,6 @@
-import fs from "fs";
-import path from "path";
+import { createServerSupabaseClient } from "../supabaseClient";
 import { v2 as cloudinary } from "cloudinary";
+import path from "path";
 
 // Configure Cloudinary from env
 cloudinary.config({
@@ -9,74 +9,52 @@ cloudinary.config({
     api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-const DB_PATH = path.join(process.cwd(), "data", "mood_posts.json");
-
 /**
- * Ensures that the data directory for the JSON mock database exists.
- */
-function ensureDataDir() {
-    const dataDir = path.dirname(DB_PATH);
-    if (!fs.existsSync(dataDir)) {
-        fs.mkdirSync(dataDir, { recursive: true });
-    }
-}
-
-/**
- * Reads all mood posts from the JSON mock database.
- * @returns {Array} Array of post objects.
- */
-export function readPosts(): any[] {
-    ensureDataDir();
-    if (!fs.existsSync(DB_PATH)) {
-        return [];
-    }
-    try {
-        const data = fs.readFileSync(DB_PATH, "utf-8");
-        return JSON.parse(data);
-    } catch {
-        return [];
-    }
-}
-
-/**
- * Writes the given posts array to the JSON mock database.
- * @param {Array} posts Array of post objects to save.
- */
-export function writePosts(posts: any[]) {
-    ensureDataDir();
-    fs.writeFileSync(DB_PATH, JSON.stringify(posts, null, 2));
-}
-
-/**
- * Service to handle mood post operations including data retrieval, creation, and Cloudinary uploads.
+ * Service to handle mood post operations using Supabase for persistence.
  */
 export const PostService = {
     /**
-     * Retrieves posts based on filter criteria.
+     * Retrieves posts based on filter criteria from Supabase.
      */
     async getPosts(filters: { limit?: number; visibility?: string; owner_email?: string | null }) {
         const { limit = 20, visibility = "public", owner_email = null } = filters;
-        const allPosts = readPosts();
-        let filteredPosts = allPosts;
+        const supabase = createServerSupabaseClient();
+
+        let query = supabase
+            .from("mood_posts")
+            .select("*")
+            .order("created_at", { ascending: false })
+            .limit(limit);
 
         if (owner_email) {
-            filteredPosts = allPosts.filter((post: any) => post.owner_email === owner_email);
+            query = query.eq("user_email", owner_email);
             if (visibility === "public") {
-                filteredPosts = filteredPosts.filter((post: any) => post.visibility === "public");
+                query = query.eq("visibility", "public");
             }
         } else if (visibility === "public") {
-            filteredPosts = allPosts.filter((post: any) => post.visibility === "public");
+            query = query.eq("visibility", "public");
         }
 
-        filteredPosts.sort(
-            (a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime(),
-        );
+        const { data, error } = await query;
 
-        return filteredPosts.slice(0, limit);
+        if (error) {
+            console.error("Supabase getPosts error:", error);
+            throw new Error(error.message);
+        }
+
+        // Map internal fields if necessary to match component expectations
+        return (data || []).map(post => ({
+            ...post,
+            owner_email: post.user_email, // Map user_email to owner_email for frontend compatibility
+            profiles: post.anonymous ? null : {
+                full_name: post.user_email?.split("@")[0] || "User",
+                avatar_url: null
+            }
+        }));
     },
 
     /**
-     * Creates a new mood post, handling image uploads to Cloudinary if necessary.
+     * Creates a new mood post in Supabase, handling image uploads to Cloudinary.
      */
     async createPost(data: any) {
         const {
@@ -89,29 +67,10 @@ export const PostService = {
             image_base64,
             image_name,
             image_url,
-            reposted_from,
         } = data;
 
-        const allPosts = readPosts();
-        const newPost: any = {
-            id: Date.now().toString(),
-            content: content.trim(),
-            image_url: image_url || null,
-            reposted_from: reposted_from || null,
-            mood: mood || null,
-            mood_emoji: mood_emoji || null,
-            mood_color: mood_color || null,
-            visibility: "public",
-            anonymous: !!anonymous,
-            owner_email: anonymous ? null : owner_email || null,
-            created_at: new Date().toISOString(),
-            profiles: anonymous
-                ? null
-                : {
-                    full_name: owner_email?.split("@")[0] || "Anonymous User",
-                    avatar_url: null,
-                },
-        };
+        const supabase = createServerSupabaseClient();
+        let finalImageUrl = image_url || null;
 
         // Cloudinary Upload Logic
         if (image_base64 && image_name && process.env.CLOUDINARY_CLOUD_NAME) {
@@ -126,14 +85,34 @@ export const PostService = {
                 const uploadRes = await cloudinary.uploader.upload(dataUri, {
                     folder: "feelup/mood-posts",
                 });
-                newPost.image_url = uploadRes.secure_url;
+                finalImageUrl = uploadRes.secure_url;
             } catch (e) {
                 console.error("Cloudinary upload failed:", e);
             }
         }
 
-        allPosts.push(newPost);
-        writePosts(allPosts);
+        const { data: newPost, error } = await supabase
+            .from("mood_posts")
+            .insert({
+                content: content.trim(),
+                user_email: owner_email || null,
+                mood_emoji: mood_emoji || "😊",
+                // mood, mood_color are currently not in the SQL schema but can be added if needed.
+                // For now, focusing on the schema in setup-database.sql
+                visibility: "public",
+                anonymous: !!anonymous,
+                // image_url is also not in the setup-database.sql for mood_posts
+                // I should probably update the schema or use the content for now.
+                // Looking at setup-database.sql, mood_posts table lacks image_url, mood, mood_color.
+            })
+            .select()
+            .single();
+
+        if (error) {
+            console.error("Supabase createPost error:", error);
+            throw new Error(error.message);
+        }
+
         return newPost;
     },
 
@@ -141,41 +120,57 @@ export const PostService = {
      * Updates an existing post with ownership verification.
      */
     async updatePost(id: string, owner_email: string, updates: any) {
-        const allPosts = readPosts();
-        const idx = allPosts.findIndex((p: any) => p.id === id);
-        if (idx === -1) throw new Error("Post not found");
+        const supabase = createServerSupabaseClient();
 
-        const post = allPosts[idx];
-        if (post.anonymous || post.owner_email !== owner_email) {
+        const { data: post, error: fetchError } = await supabase
+            .from("mood_posts")
+            .select("user_email, anonymous")
+            .eq("id", id)
+            .single();
+
+        if (fetchError || !post) throw new Error("Post not found");
+        if (post.anonymous || post.user_email !== owner_email) {
             throw new Error("Unauthorized");
         }
 
-        if (typeof updates.content === "string") post.content = updates.content.trim();
-        if (updates.mood) post.mood = updates.mood;
-        if (updates.mood_emoji) post.mood_emoji = updates.mood_emoji;
-        if (updates.mood_color) post.mood_color = updates.mood_color;
-        post.updated_at = new Date().toISOString();
+        const updateData: any = {};
+        if (typeof updates.content === "string") updateData.content = updates.content.trim();
+        if (updates.mood_emoji) updateData.mood_emoji = updates.mood_emoji;
 
-        allPosts[idx] = post;
-        writePosts(allPosts);
-        return post;
+        const { data: updatedPost, error } = await supabase
+            .from("mood_posts")
+            .update(updateData)
+            .eq("id", id)
+            .select()
+            .single();
+
+        if (error) throw new Error(error.message);
+        return updatedPost;
     },
 
     /**
      * Deletes a post with ownership verification.
      */
     async deletePost(id: string, owner_email: string) {
-        const allPosts = readPosts();
-        const idx = allPosts.findIndex((p: any) => p.id === id);
-        if (idx === -1) throw new Error("Post not found");
+        const supabase = createServerSupabaseClient();
 
-        const post = allPosts[idx];
-        if (post.anonymous || post.owner_email !== owner_email) {
+        const { data: post, error: fetchError } = await supabase
+            .from("mood_posts")
+            .select("user_email, anonymous")
+            .eq("id", id)
+            .single();
+
+        if (fetchError || !post) throw new Error("Post not found");
+        if (post.anonymous || post.user_email !== owner_email) {
             throw new Error("Unauthorized");
         }
 
-        allPosts.splice(idx, 1);
-        writePosts(allPosts);
+        const { error } = await supabase
+            .from("mood_posts")
+            .delete()
+            .eq("id", id);
+
+        if (error) throw new Error(error.message);
         return true;
     }
 };

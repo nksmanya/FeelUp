@@ -1,35 +1,9 @@
 import { NextResponse } from "next/server";
-import fs from "fs";
-import path from "path";
+import { createServerSupabaseClient } from "@/lib/supabaseClient";
 
-// Mock database using JSON file for development
-const DB_PATH = path.join(process.cwd(), "data", "comments.json");
-
-function ensureDataDir() {
-  const dataDir = path.dirname(DB_PATH);
-  if (!fs.existsSync(dataDir)) {
-    fs.mkdirSync(dataDir, { recursive: true });
-  }
-}
-
-function readComments() {
-  ensureDataDir();
-  if (!fs.existsSync(DB_PATH)) {
-    return [];
-  }
-  try {
-    const data = fs.readFileSync(DB_PATH, "utf-8");
-    return JSON.parse(data);
-  } catch {
-    return [];
-  }
-}
-
-function writeComments(comments: any[]) {
-  ensureDataDir();
-  fs.writeFileSync(DB_PATH, JSON.stringify(comments, null, 2));
-}
-
+/**
+ * GET handler to retrieve comments for a specific post from Supabase.
+ */
 export async function GET(req: Request) {
   try {
     const url = new URL(req.url);
@@ -39,18 +13,16 @@ export async function GET(req: Request) {
       return NextResponse.json({ error: "Missing post_id" }, { status: 400 });
     }
 
-    const allComments = readComments();
-    const postComments = allComments.filter(
-      (comment: any) => comment.post_id === postId,
-    );
+    const supabase = createServerSupabaseClient();
+    const { data: comments, error } = await supabase
+      .from("post_comments")
+      .select("*, profiles(full_name, avatar_url)")
+      .eq("post_id", postId)
+      .order("created_at", { ascending: true });
 
-    // Sort by created_at ascending
-    postComments.sort(
-      (a: any, b: any) =>
-        new Date(a.created_at).getTime() - new Date(b.created_at).getTime(),
-    );
+    if (error) throw new Error(error.message);
 
-    return NextResponse.json({ comments: postComments });
+    return NextResponse.json({ comments: comments || [] });
   } catch (err: any) {
     console.error("Comments GET error:", err);
     return NextResponse.json(
@@ -60,68 +32,51 @@ export async function GET(req: Request) {
   }
 }
 
+/**
+ * POST handler to create a new comment on Supabase.
+ */
 export async function POST(req: Request) {
   try {
     const body = await req.json();
     const { post_id, content, anonymous, user_email } = body || {};
 
     if (!post_id || !content || !user_email) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 },
-      );
+      return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
-    // Simple positivity filter - reject negative words
-    const negativeWords = [
-      "hate",
-      "awful",
-      "terrible",
-      "stupid",
-      "ugly",
-      "worst",
-      "suck",
-    ];
-    const lowerContent = content.toLowerCase();
-    const hasNegativeWords = negativeWords.some((word) =>
-      lowerContent.includes(word),
-    );
-
-    if (hasNegativeWords) {
-      return NextResponse.json(
-        {
-          error: "Please keep comments positive and supportive! 💕",
-        },
-        { status: 400 },
-      );
+    // Simple positivity filter
+    const negativeWords = ["hate", "awful", "terrible", "stupid", "ugly", "worst", "suck"];
+    if (negativeWords.some(word => content.toLowerCase().includes(word))) {
+      return NextResponse.json({ error: "Please keep comments positive! 💕" }, { status: 400 });
     }
 
-    const allComments = readComments();
-    const newComment = {
-      id: Date.now().toString(),
-      post_id: post_id,
-      content: content.trim(),
-      anonymous: !!anonymous,
-      user_email: anonymous ? null : user_email,
-      created_at: new Date().toISOString(),
-      profiles: anonymous
-        ? null
-        : {
-            full_name: user_email?.split("@")[0] || "Anonymous User",
-            avatar_url: null,
-          },
-    };
+    const supabase = createServerSupabaseClient();
 
-    allComments.push(newComment);
-    writeComments(allComments);
+    // Get user_id from email
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("id")
+      .eq("email", user_email)
+      .single();
 
-    console.log("Comment created successfully:", newComment);
-    return NextResponse.json({ comment: newComment });
+    if (!profile) return NextResponse.json({ error: "User profile not found" }, { status: 404 });
+
+    const { data: comment, error } = await supabase
+      .from("post_comments")
+      .insert({
+        post_id,
+        user_id: profile.id,
+        content: content.trim(),
+        anonymous: !!anonymous,
+      })
+      .select("*, profiles(full_name, avatar_url)")
+      .single();
+
+    if (error) throw new Error(error.message);
+
+    return NextResponse.json({ comment });
   } catch (err: any) {
     console.error("Comments POST error:", err);
-    return NextResponse.json(
-      { error: err?.message || String(err) },
-      { status: 500 },
-    );
+    return NextResponse.json({ error: err?.message || String(err) }, { status: 500 });
   }
 }
