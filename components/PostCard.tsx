@@ -1,11 +1,17 @@
 import React from "react";
 import Link from "next/link";
 
+/**
+ * Profile information associated with a mood post.
+ */
 type Profile = {
   full_name?: string;
   avatar_url?: string | null;
 };
 
+/**
+ * Mood post data structure.
+ */
 type Post = {
   id: string;
   content: string;
@@ -18,12 +24,18 @@ type Post = {
   profiles?: Profile | null;
 };
 
+/**
+ * Renders a single mood post with user metadata, content, and interactions.
+ */
 export default function PostCard({ post }: { post: Post }) {
   const name = post.anonymous
     ? "Anonymous"
     : post.profiles?.full_name || post.owner_email || "User";
   const avatarLetter = name?.[0] || "U";
 
+  /**
+   * Helper function to convert ISO date strings into human-readable relative time.
+   */
   function timeAgo(date?: string) {
     if (!date) return "";
     const then = new Date(date).getTime();

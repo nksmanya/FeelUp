@@ -4,46 +4,22 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import {
-  Heart,
-  Target,
-  BookOpen,
-  Calendar,
-  Search,
-  MessageCircle,
-  BarChart3,
-  User,
-  Settings,
-  Trophy,
   LogOut,
-  Info,
-  Shield,
-  HelpCircle,
-  FileText,
   ChevronUp,
 } from "lucide-react";
+import { navigationLinks, resourceLinks } from "../lib/navigation";
 
+/**
+ * Sidebar component for desktop view providing primary and secondary navigation.
+ */
 export default function Sidebar() {
   const { data: session } = useSession();
   const router = useRouter();
   const pathname = usePathname();
 
-  const navigation = [
-    { name: "Home", href: "/mood-feed", icon: Heart },
-    { name: "Goals", href: "/goals", icon: Target },
-    { name: "Journal", href: "/journal", icon: BookOpen },
-    { name: "Events", href: "/events", icon: Calendar },
-    { name: "Explore", href: "/explore", icon: Search },
-    { name: "Messages", href: "/messages", icon: MessageCircle },
-    { name: "Analytics", href: "/analytics", icon: BarChart3 },
-  ];
-
-  const resourceLinks = [
-    { name: "About", href: "/about", icon: Info },
-    { name: "Privacy Policy", href: "/privacy", icon: Shield },
-    { name: "Settings", href: "/settings", icon: Settings },
-    { name: "Support", href: "/support", icon: HelpCircle },
-    { name: "Terms", href: "/terms", icon: FileText },
-  ];
+  // Source navigation from central config
+  const navigation = navigationLinks;
+  const resources = resourceLinks;
 
   const handleSignOut = async () => {
     await signOut({ redirect: false });
@@ -70,15 +46,13 @@ export default function Sidebar() {
             <li key={item.name}>
               <Link
                 href={item.href}
-                className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group ${
-                  pathname === item.href
+                className={`flex items-center gap-4 px-4 py-3 rounded-xl transition-all duration-200 group ${pathname === item.href
                     ? "bg-blue-50 text-blue-600 shadow-sm border border-blue-100"
                     : "text-gray-600 hover:bg-gray-50 hover:text-gray-900 hover:shadow-sm"
-                }`}
+                  }`}
               >
-                <item.icon className={`w-5 h-5 transition-colors ${
-                  pathname === item.href ? "text-blue-500" : "text-gray-400 group-hover:text-gray-600"
-                }`} />
+                <item.icon className={`w-5 h-5 transition-colors ${pathname === item.href ? "text-blue-500" : "text-gray-400 group-hover:text-gray-600"
+                  }`} />
                 <span className="font-medium text-sm">{item.name}</span>
               </Link>
             </li>
@@ -94,19 +68,17 @@ export default function Sidebar() {
             <ChevronUp className="w-3 h-3 text-gray-400" />
           </div>
           <ul className="space-y-1">
-            {resourceLinks.map((item) => (
+            {resources.map((item) => (
               <li key={item.name}>
                 <Link
                   href={item.href}
-                  className={`flex items-center gap-3 px-4 py-2 transition-all duration-200 group ${
-                    pathname === item.href
+                  className={`flex items-center gap-3 px-4 py-2 transition-all duration-200 group ${pathname === item.href
                       ? "bg-blue-50 text-blue-600 border-r-2 border-blue-500"
                       : "text-gray-500 hover:bg-gray-50 hover:text-gray-700"
-                  }`}
+                    }`}
                 >
-                  <item.icon className={`w-4 h-4 transition-colors ${
-                    pathname === item.href ? "text-blue-500" : "text-gray-400 group-hover:text-gray-600"
-                  }`} />
+                  <item.icon className={`w-4 h-4 transition-colors ${pathname === item.href ? "text-blue-500" : "text-gray-400 group-hover:text-gray-600"
+                    }`} />
                   <span className="font-medium text-sm">{item.name}</span>
                 </Link>
               </li>

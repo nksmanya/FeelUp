@@ -1,0 +1,55 @@
+# FeelUp - Features Overview
+
+FeelUp is a comprehensive wellness and mood-tracking application designed to help users monitor their emotional well-being, set personal goals, and engage with a supportive community.
+
+## Core Features
+
+### 1. Mood Tracking & Sharing
+- **Mood Feed:** A real-time feed of mood posts from the community.
+- **Mood Posts:** Create and share mood updates with emojis and custom content.
+- **Privacy Controls:** Option to post publicly, privately, or anonymously.
+- **Reactions & Comments:** Engage with others' posts through supportive reactions and comments.
+
+### 2. Journaling
+- **Mood Journal:** Private space for daily reflections and deep-dives into emotional states.
+- **Gratitude Journaling:** Dedicated feature for recording things you're grateful for.
+- **Energy Level Tracking:** Monitor energy levels (scale 1-5) alongside mood.
+- **Tagging System:** Organize entries with custom tags and mood tags.
+- **Entry Conversion:** Ability to convert private journal entries into community posts.
+
+### 3. Goal Setting & Management
+- **Personal Goals:** Set and track specific wellness or personal growth goals.
+- **Completion Reflections:** Record your mood and a reflection note upon completing a goal.
+- **Progress Tracking:** View history and stats of completed goals.
+
+### 4. Gamification & Motivation
+- **Streaks:** Track consistent activity across goals, posts, and journaling.
+- **Achievements & Badges:** Earn badges for milestones (e.g., 7-day streak, social engagement, wellness goals).
+- **Point System:** Accumulate points through various activities within the app.
+
+### 5. Community & Social
+- **Explore:** Discover new content and connected users within the community.
+- **Community Guidelines:** Clear standards for maintaining a supportive environment.
+- **Follow System:** Follow other users to keep up with their wellness journeys.
+- **Messaging:** Direct communication with peers for deeper support.
+- **Events:** Participate in community-wide wellness events.
+
+### 6. Analytics & Insights
+- **Mood Analytics:** Detailed visualization and analysis of mood patterns over time.
+- **Daily Activity Tracking:** Keep tabs on your overall engagement and wellness habits.
+
+### 7. User Profile & Personalization
+- **Customizable Profiles:** Personalize with bios, full names, and avatars.
+- **Theme Support:** Choose from different visual themes (e.g., default, dark modes).
+- **Mood Colors:** Set a signature mood color for your profile.
+- **Privacy Settings:** Robust controls over who can see your data and posts.
+
+### 8. System & Support
+- **Secure Authentication:** User login and profile management.
+- **Terms & Privacy:** Transparent documentation of terms of service and privacy policies.
+- **Support Center:** Resources and help for using the application.
+
+## Technical Foundation
+- **Frontend:** Built with Next.js (App Router), React, and Tailwind CSS.
+- **Backend:** API-driven architecture with Supabase/PostgreSQL for data persistence.
+- **Database Schema:** Includes dedicated tables for profiles, streaks, achievements, mood posts, reactions, comments, goals, and journal entries.

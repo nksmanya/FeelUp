@@ -10,7 +10,7 @@ export default function Page() {
             <p className="text-gray-600 mb-6">
               A gentle, private place to reflect and connect. Sign in or create an account to access your mood feed.
             </p>
-            {/* You can add marketing or feature highlights here */}
+            {/* Feature Highlights Section */}
           </section>
 
           <aside>

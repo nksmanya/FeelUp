@@ -5,69 +5,24 @@ import Link from "next/link";
 import { useRouter, usePathname } from "next/navigation";
 import { useSession, signOut } from "next-auth/react";
 import {
-  Heart,
-  Target,
-  BookOpen,
-  Calendar,
-  Search,
-  MessageCircle,
-  BarChart3,
   User,
   Settings,
   Trophy,
   LogOut,
 } from "lucide-react";
+import { navigationLinks } from "../lib/navigation";
 
+/**
+ * Navbar component for mobile view and primary top-level navigation.
+ */
 export default function Navbar() {
   const { data: session } = useSession();
   const [showProfileMenu, setShowProfileMenu] = useState(false);
   const router = useRouter();
   const pathname = usePathname();
 
-  const navigation = [
-    {
-      name: "Mood Feed",
-      href: "/mood-feed",
-      icon: Heart,
-      description: "Share & connect",
-    },
-    {
-      name: "Goals",
-      href: "/goals",
-      icon: Target,
-      description: "Track progress",
-    },
-    {
-      name: "Journal",
-      href: "/journal",
-      icon: BookOpen,
-      description: "Private thoughts",
-    },
-    {
-      name: "Events",
-      href: "/events",
-      icon: Calendar,
-      description: "Join activities",
-    },
-    {
-      name: "Explore",
-      href: "/explore",
-      icon: Search,
-      description: "Find friends",
-    },
-    {
-      name: "Messages",
-      href: "/messages",
-      icon: MessageCircle,
-      description: "Chat privately",
-    },
-    {
-      name: "Analytics",
-      href: "/analytics",
-      icon: BarChart3,
-      description: "Mood insights",
-    },
-  ];
+  // Navigation items are now sourced from a centralized configuration file
+  const navigation = navigationLinks;
 
   const handleSignOut = async () => {
     await signOut({ redirect: false });
@@ -106,11 +61,10 @@ export default function Navbar() {
               <Link
                 key={item.name}
                 href={item.href}
-                className={`group relative px-3 py-2 rounded-full text-sm font-medium transition-colors ${
-                  pathname === item.href
+                className={`group relative px-3 py-2 rounded-full text-sm font-medium transition-colors ${pathname === item.href
                     ? "bg-[rgba(37,150,190,0.09)] text-[var(--brand-blue)]"
                     : "text-[var(--text-muted)] hover:bg-[rgba(37,150,190,0.03)] hover:text-[var(--brand-blue)]"
-                }`}
+                  }`}
               >
                 <div className="flex items-center space-x-2">
                   <item.icon className="w-4 h-4" />
@@ -235,15 +189,14 @@ export default function Navbar() {
       <div className="md:hidden border-t border-gray-200">
         <div className="flex overflow-x-auto py-2 px-4 space-x-1">
           {navigation.map((item) => (
-              <Link
-                key={item.name}
-                href={item.href}
-                className={`flex flex-col items-center min-w-0 flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${
-                  pathname === item.href
-                    ? "bg-purple-100 text-purple-700"
-                    : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
+            <Link
+              key={item.name}
+              href={item.href}
+              className={`flex flex-col items-center min-w-0 flex-shrink-0 px-3 py-2 rounded-lg text-xs font-medium transition-colors ${pathname === item.href
+                  ? "bg-purple-100 text-purple-700"
+                  : "text-gray-600 hover:bg-gray-100 hover:text-gray-900"
                 }`}
-              >
+            >
               <item.icon className="w-5 h-5 mb-1" />
               <span className="truncate">{item.name}</span>
             </Link>
