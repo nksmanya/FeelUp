@@ -1,10 +1,10 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 
-export default function ScheduleCallPage() {
+function ScheduleCallClient() {
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
   const sp = useSearchParams();
   const router = useRouter();
@@ -64,5 +64,19 @@ export default function ScheduleCallPage() {
         </button>
       </div>
     </div>
+  );
+}
+
+export default function ScheduleCallPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-sm text-gray-600">Loading...</div>
+        </div>
+      }
+    >
+      <ScheduleCallClient />
+    </Suspense>
   );
 }

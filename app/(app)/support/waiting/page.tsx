@@ -1,10 +1,10 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { Suspense, useEffect, useMemo, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 
-export default function SupportWaitingPage() {
+function SupportWaitingClient() {
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
   const sp = useSearchParams();
   const router = useRouter();
@@ -114,5 +114,19 @@ export default function SupportWaitingPage() {
         ) : null}
       </div>
     </div>
+  );
+}
+
+export default function SupportWaitingPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-sm text-gray-600">Loading...</div>
+        </div>
+      }
+    >
+      <SupportWaitingClient />
+    </Suspense>
   );
 }

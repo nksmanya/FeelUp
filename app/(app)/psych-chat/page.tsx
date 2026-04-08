@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useEffect, useState, useRef, useCallback } from "react";
+import { Suspense, useMemo, useEffect, useState, useRef, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 import { SendHorizontal, ArrowLeft, RefreshCw } from "lucide-react";
@@ -15,7 +15,7 @@ function timeAgo(ts: string) {
   return new Date(ts).toLocaleString();
 }
 
-export default function PsychChatPage() {
+function PsychChatClient() {
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
   const sp = useSearchParams();
   const router = useRouter();
@@ -298,5 +298,19 @@ export default function PsychChatPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PsychChatPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+          <div className="text-sm text-gray-600">Loading...</div>
+        </div>
+      }
+    >
+      <PsychChatClient />
+    </Suspense>
   );
 }

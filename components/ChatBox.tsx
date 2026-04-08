@@ -24,8 +24,8 @@ export default function ChatBox({ otherUserId }: { otherUserId: string }) {
 
   /* -------- Get logged-in Supabase user -------- */
   useEffect(() => {
-    //.getUser().then(({ data }) => {
-      if (data.user) {
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) {
         setCurrentUserId(data.user.id);
       }
     });

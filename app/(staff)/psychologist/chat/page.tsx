@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 import { SendHorizontal } from "lucide-react";
@@ -41,7 +41,7 @@ function statusBadgeClasses(status?: TicketRow["status"]) {
   }
 }
 
-export default function PsychologistChatPage() {
+function PsychologistChatClient() {
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
   const sp = useSearchParams();
   const router = useRouter();
@@ -384,5 +384,17 @@ export default function PsychologistChatPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PsychologistChatPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-slate-50 p-6 text-slate-700">Loading...</div>
+      }
+    >
+      <PsychologistChatClient />
+    </Suspense>
   );
 }

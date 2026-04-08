@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useRef, useState } from "react";
+import { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 import {
@@ -33,7 +33,7 @@ function Toast({ text }: { text: string }) {
   );
 }
 
-export default function AIBuddyPage() {
+function AIBuddyClient() {
   const supabase = useMemo(() => createBrowserSupabaseClient(), []);
   const sp = useSearchParams();
   const router = useRouter();
@@ -736,5 +736,21 @@ export default function AIBuddyPage() {
         </motion.div>
       </motion.main>
     </div>
+  );
+}
+
+export default function AIBuddyPage() {
+  return (
+    <Suspense
+      fallback={
+        <div className="min-h-screen bg-[#f7f7f8]">
+          <div className="mx-auto max-w-2xl px-4 py-6 text-sm text-gray-600">
+            Loading...
+          </div>
+        </div>
+      }
+    >
+      <AIBuddyClient />
+    </Suspense>
   );
 }

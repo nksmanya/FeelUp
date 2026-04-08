@@ -1,6 +1,6 @@
 "use server";
 
-import { createClient } from "@/lib/supabase/server";
+import { supabaseAdmin as supabase } from "@/lib/supabaseServer";
 
 /* 1️⃣ Auto-create profile after signup */
 export async function createProfile(
@@ -8,7 +8,6 @@ export async function createProfile(
   fullName: string,
   username: string
 ) {
-  const supabase = createClient();
 
   const { error } = await supabase.from("profiles").insert({
     id: userId,
@@ -23,7 +22,6 @@ export async function createProfile(
 
 /* 2️⃣ Username availability check */
 export async function isUsernameAvailable(username: string) {
-  const supabase = createClient();
 
   const { data, error } = await supabase
     .from("profiles")

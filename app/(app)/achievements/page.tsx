@@ -1,9 +1,9 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { // } from "///react";
+import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
-import Navbar from "../../components/Navbar";
+import Navbar from "@/components/Navbar";
 import { Lock } from "lucide-react";
 
 const achievementCategories = [
@@ -180,18 +180,7 @@ const allPossibleAchievements = [
 ];
 
 export default function AchievementsPage() {
-  const supabase = //();
-const [user, setUser] = useState<any>(null);
-
-useEffect(() => {
-  //.getUser().then(({ data }) => {
-    if (!data.user) {
-      router.push("/login");
-    } else {
-      setUser(data.user);
-    }
-  });
-}, []);
+  const supabase = createBrowserSupabaseClient();
   const [user, setUser] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [achievements, setAchievements] = useState<any[]>([]);
@@ -222,13 +211,15 @@ useEffect(() => {
   }, [user?.email]);
 
   useEffect(() => {
-    if (session?.user?.email) {
-      setUser(session.user);
+    supabase.auth.getUser().then(({ data }) => {
+      if (data?.user) {
+        setUser(data.user);
+      } else {
+        router.push("/login");
+      }
       setLoading(false);
-    } else {
-      setLoading(false);
-    }
-  }, [session]);
+    });
+  }, [supabase, router]);
 
   useEffect(() => {
     if (user?.email) {

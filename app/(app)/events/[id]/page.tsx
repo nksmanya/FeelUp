@@ -466,7 +466,7 @@ export default function EventDetailPage() {
               Interested
             </button>
           </div>
-        </div>
+        </motion.div>
 
         <motion.div variants={cardIn} className="bg-white rounded-2xl p-6 shadow-sm mt-6">
           <h2 className="text-lg font-bold">Q&A / Comments</h2>
