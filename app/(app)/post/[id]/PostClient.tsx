@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
-import Navbar from "@/components/Navbar";
 import Footer from "@/components/Footer";
 
 const PROFILES_FK_REL = "mood_posts_owner_id_fkey";
@@ -74,8 +73,6 @@ export default function PostClient() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
       <main className="max-w-2xl mx-auto p-4">
         <div className="bg-white rounded-xl p-5 shadow-sm">
           <div className="text-sm text-gray-500">

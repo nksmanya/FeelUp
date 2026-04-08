@@ -11,10 +11,12 @@ export default function Topbar() {
   const [unreadCount, setUnreadCount] = useState(0);
 
   useEffect(() => {
-    let channel: any;
+    let cancelled = false;
+    let channel: any = null;
 
     const setup = async () => {
       const { data } = await supabase.auth.getUser();
+      if (cancelled) return;
       const user = data.user;
       if (!user) return;
 
@@ -29,8 +31,10 @@ export default function Topbar() {
         setUnreadCount(count || 0);
       }
 
+      if (cancelled) return;
+
       // 2️⃣ Realtime updates
-      channel = supabase
+      const nextChannel = supabase
         .channel(`notifications-${user.id}`)
         .on(
           "postgres_changes",
@@ -64,17 +68,20 @@ export default function Topbar() {
           }
         )
         .subscribe();
+
+      channel = nextChannel;
     };
 
     setup();
 
     return () => {
+      cancelled = true;
       if (channel) supabase.removeChannel(channel);
     };
   }, [supabase]);
 
   return (
-    <div className="hidden md:flex items-center gap-3">
+    <div className="flex items-center gap-2 sm:gap-3">
       {/* Messages */}
       <Link
         href="/messages"

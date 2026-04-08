@@ -4,6 +4,9 @@
   color-scheme: light;
   --background: #f7f8fb;
   --foreground: #0f172a;
+  --brand-black: #0f172a;
+  --footer-grad-start: #f8fdff;
+  --footer-grad-end: #ffffff;
 
   --brand-blue: #3b82f6;
   --brand-pink: #ec4899;
@@ -23,6 +26,9 @@
   color-scheme: dark;
   --background: #0b0b0f;
   --foreground: #f8fafc;
+  --brand-black: #f8fafc;
+  --footer-grad-start: #0b0b0f;
+  --footer-grad-end: #0f1116;
 
   --brand-blue: #4f8bff;
   --brand-pink: #f472b6;
@@ -184,4 +190,32 @@ body {
 .dark .hover\:bg-slate-100:hover,
 .dark .hover\:bg-white:hover {
   background-color: var(--input-bg) !important;
+}
+
+/* Dark mode normalization for common light gradients */
+.dark .from-gray-50,
+.dark .from-slate-50,
+.dark .from-blue-50,
+.dark .from-indigo-50,
+.dark .from-purple-50,
+.dark .from-pink-50,
+.dark .from-yellow-50,
+.dark .from-blue-100,
+.dark .from-purple-100,
+.dark .from-pink-100,
+.dark .from-yellow-100 {
+  --tw-gradient-from: var(--background) var(--tw-gradient-from-position);
+  --tw-gradient-to: var(--background) var(--tw-gradient-to-position);
+  --tw-gradient-stops: var(--tw-gradient-from), var(--tw-gradient-to);
+}
+
+.dark .to-white,
+.dark .to-gray-50,
+.dark .to-slate-50,
+.dark .to-blue-50,
+.dark .to-indigo-50,
+.dark .to-purple-100,
+.dark .to-pink-100,
+.dark .to-yellow-100 {
+  --tw-gradient-to: var(--background) var(--tw-gradient-to-position);
 }

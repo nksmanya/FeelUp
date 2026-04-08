@@ -15,7 +15,7 @@ export default function Footer() {
   ];
 
   return (
-    <footer className="bg-[linear-gradient(180deg,#f8fdff,#ffffff)] border-t border-gray-100 mt-16 soft-glow">
+    <footer className="bg-[linear-gradient(180deg,var(--footer-grad-start),var(--footer-grad-end))] border-t border-[var(--card-border)] mt-16 soft-glow">
       <div className="max-w-7xl mx-auto px-4 py-12">
         <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
           {/* Brand */}
@@ -29,7 +29,7 @@ export default function Footer() {
                   <span className="text-white font-bold text-sm">F</span>
                 </div>
               </div>
-              <div className="text-xl font-bold text-[var(--brand-black)]">
+              <div className="text-xl font-bold text-[var(--foreground)]">
                 Feel<span className="text-[var(--brand-blue)]">Up</span>
               </div>
             </div>
@@ -41,7 +41,7 @@ export default function Footer() {
 
           {/* Quick Links */}
           <div>
-            <h3 className="font-semibold text-[var(--brand-black)] mb-4">
+            <h3 className="font-semibold text-[var(--foreground)] mb-4">
               Features
             </h3>
             <ul className="space-y-2 text-sm text-[var(--feelup-muted)]">
@@ -90,7 +90,7 @@ export default function Footer() {
 
           {/* Account */}
           <div>
-            <h3 className="font-semibold text-[var(--brand-black)] mb-4">
+            <h3 className="font-semibold text-[var(--foreground)] mb-4">
               Account
             </h3>
             <ul className="space-y-2 text-sm text-[var(--feelup-muted)]">
@@ -119,7 +119,7 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <span className="text-[rgba(107,122,137,0.6)]">
+                <span className="text-[var(--feelup-muted)] opacity-70">
                   Premium (Coming Soon)
                 </span>
               </li>
@@ -128,7 +128,7 @@ export default function Footer() {
 
           {/* Support & Legal */}
           <div>
-            <h3 className="font-semibold text-[var(--brand-black)] mb-4">
+            <h3 className="font-semibold text-[var(--foreground)] mb-4">
               Support & Legal
             </h3>
             <ul className="space-y-2 text-sm text-[var(--feelup-muted)]">
@@ -147,7 +147,7 @@ export default function Footer() {
         </div>
 
         {/* Bottom */}
-        <div className="border-t border-gray-100 mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
+        <div className="border-t border-[var(--card-border)] mt-8 pt-6 flex flex-col md:flex-row justify-between items-center">
           <div className="text-sm text-[var(--feelup-muted)] mb-4 md:mb-0 flex items-center gap-2">
             © {currentYear} FeelUp. Made with <Heart className="w-4 h-4 text-red-500" /> for your wellness journey.
           </div>

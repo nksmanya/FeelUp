@@ -3,7 +3,6 @@
 import { useEffect, useState, useCallback } from "react";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
 import { useRouter } from "next/navigation";
-import Navbar from "@/components/Navbar";
 import { Lock } from "lucide-react";
 
 const achievementCategories = [
@@ -230,7 +229,6 @@ export default function AchievementsPage() {
   if (loading) {
     return (
       <div className="min-h-screen bg-gray-50">
-        <Navbar />
         <div className="flex justify-center items-center h-64">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
         </div>
@@ -263,8 +261,6 @@ export default function AchievementsPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Navbar />
-
       <main className="max-w-6xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="text-center mb-8">

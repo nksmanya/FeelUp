@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
-import Navbar from "@/components/Navbar";
 
 const PROFILES_FK_REL = "mood_posts_owner_id_fkey";
 
@@ -80,8 +79,6 @@ export default function SavedClient() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <Navbar />
-
       <main className="max-w-3xl mx-auto p-4">
         <div className="flex items-end justify-between mb-6">
           <div>

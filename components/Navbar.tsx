@@ -13,7 +13,7 @@ import {
   Settings,
 } from "lucide-react";
 
-export default function Navbar() {
+export default function Navbar({ className = "" }: { className?: string }) {
   const pathname = usePathname();
 
   const links = [
@@ -28,7 +28,7 @@ export default function Navbar() {
   ];
 
   return (
-    <nav className="w-full bg-white border-b">
+    <nav className={`w-full bg-[var(--card-bg)] border-b border-[var(--card-border)] ${className}`}>
       <div className="max-w-7xl mx-auto px-4 py-3 flex gap-6 overflow-x-auto">
         {links.map(({ href, label, icon: Icon }) => {
           const active = pathname === href;
@@ -37,10 +37,10 @@ export default function Navbar() {
             <Link
               key={href}
               href={href}
-              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap ${
+              className={`flex items-center gap-2 px-3 py-2 rounded-lg text-sm font-medium whitespace-nowrap transition-colors ${
                 active
-                  ? "bg-purple-600 text-white"
-                  : "text-gray-600 hover:bg-gray-100"
+                  ? "bg-[var(--brand-blue)] text-white"
+                  : "text-[var(--feelup-muted)] hover:bg-[var(--input-bg)] hover:text-[var(--foreground)]"
               }`}
             >
               <Icon className="w-4 h-4" />

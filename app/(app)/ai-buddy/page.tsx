@@ -472,7 +472,7 @@ function AIBuddyClient() {
     severity === null ? "—" : severity >= 5 ? "High" : severity >= 3 ? "Medium" : "Low";
 
   return (
-    <div className="min-h-screen bg-[#f7f7f8]">
+    <div className="min-h-screen bg-[var(--background)]">
       {toast ? <Toast text={toast} /> : null}
 
       <motion.main
@@ -743,7 +743,7 @@ export default function AIBuddyPage() {
   return (
     <Suspense
       fallback={
-        <div className="min-h-screen bg-[#f7f7f8]">
+        <div className="min-h-screen bg-[var(--background)]">
           <div className="mx-auto max-w-2xl px-4 py-6 text-sm text-gray-600">
             Loading...
           </div>

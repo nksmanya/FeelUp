@@ -3,7 +3,6 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { createBrowserSupabaseClient } from "@/lib/supabaseClient";
-import Navbar from "@/components/Navbar";
 import { Bell, CheckCheck, ChevronLeft, Dot, Loader2 } from "lucide-react";
 
 type NotificationRow = {
@@ -241,8 +240,6 @@ export default function NotificationsPage() {
 
   return (
     <div className="min-h-screen bg-gradient-to-b from-gray-50 to-white">
-      <Navbar />
-
       <main className="max-w-3xl mx-auto px-4 py-8">
         {/* Header */}
         <div className="flex items-center justify-between gap-3 mb-6">
